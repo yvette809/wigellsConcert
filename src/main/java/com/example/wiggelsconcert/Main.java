@@ -1,17 +1,21 @@
 package com.example.wiggelsconcert;
 
 import javafx.application.Application;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import java.io.IOException;
+import com.example.wiggelsconcert.GUI.LoginScreen;
 
 public class Main extends Application {
-    @Override
-    public void start(Stage stage) throws IOException {
-    }
+    LoginScreen loginScreen;
 
     public static void main(String[] args) {
         launch();
+    }
+
+    @Override
+    public void start(Stage stage) {
+        stage.setTitle("Wigells Concert System");
+        loginScreen = new LoginScreen();
+        loginScreen.showLoginScreen();
     }
 }
