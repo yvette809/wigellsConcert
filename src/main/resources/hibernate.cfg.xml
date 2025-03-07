@@ -6,9 +6,9 @@
     <session-factory>
         <!-- JDBC Config -->
         <property name="hibernate.connection.driver_class">com.mysql.cj.jdbc.Driver</property>
-        <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/wigellsconcert</property>
-        <property name="hibernate.connection.username">root</property>
-        <property name="hibernate.connection.password">root</property>
+        <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/wigellsconcert?createDatabaseIfNotExist=true</property>
+        <property name="hibernate.connection.username">${db.username}</property>
+        <property name="hibernate.connection.password">${db.password}</property>
 
         <!-- Hibernate Settings -->
         <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
