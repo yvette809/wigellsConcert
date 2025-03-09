@@ -8,7 +8,7 @@ import java.util.List;
 
 public class CustomerDAO {
 
-    // Save a customer (including address)
+    // Save a customer
     public void saveCustomer(Customer customer) {
         Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
