@@ -4,12 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="da6eeb10-8cbf-4d71-bdfe-1669fb6230d9" name="Changes" comment="uppdatera">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/wiggelsconcert/utils/HibernateUtil.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/616fb8df-7b0e-4544-ada5-04cd62b84605.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/wiggelsconcert/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/wiggelsconcert/Main.java" afterDir="false" />
+    <list default="true" id="da6eeb10-8cbf-4d71-bdfe-1669fb6230d9" name="Changes" comment="customer dao created">
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/wiggelsconcert/DAO/AddressDAO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/wiggelsconcert/CustomerDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/wiggelsconcert/DAO/CustomerDAO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/wiggelsconcert/DAO.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/module-info.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/module-info.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -145,7 +144,7 @@
       <workItem from="1741175580647" duration="18781000" />
       <workItem from="1741353728220" duration="2570000" />
       <workItem from="1741537001992" duration="1534000" />
-      <workItem from="1741538574473" duration="4768000" />
+      <workItem from="1741538574473" duration="5082000" />
     </task>
     <task id="LOCAL−00001" summary="uppdatera">
       <option name="closed" value="true" />
@@ -161,7 +160,14 @@
       <option name="presentableId" value="LOCAL−00002" />
       <updated>1741270520039</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL−00003" summary="customer dao created">
+      <option name="closed" value="true" />
+      <created>1741546277280</created>
+      <option name="number" value="LOCAL−00003" />
+      <option name="presentableId" value="LOCAL−00003" />
+      <updated>1741546277280</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -169,6 +175,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="uppdatera" />
-    <option name="LAST_COMMIT_MESSAGE" value="uppdatera" />
+    <MESSAGE value="customer dao created" />
+    <option name="LAST_COMMIT_MESSAGE" value="customer dao created" />
   </component>
 </project>
