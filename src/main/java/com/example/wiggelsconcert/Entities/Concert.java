@@ -82,4 +82,9 @@ public class Concert {
     public void setArena(Arena arena) {
         this.arena = arena;
     }
+
+    @Override
+    public String toString() {
+        return this.artist + " " + this.date.toString();
+    }
 }
