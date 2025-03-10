@@ -7,21 +7,43 @@ public class HibernateUtil {
 
     private static SessionFactory sessionFactory;
 
-    static {
+    public static synchronized boolean initializeDatabase(String username, String password, String ip, String port) {
+        if (sessionFactory != null) {
+            System.out.println("SessionFactory is already initialized.");
+            return true;
+        }
+
         try {
-            // Create session factory
-            sessionFactory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory();
+            Configuration configuration = new Configuration();
+            configuration.configure("hibernate.cfg.xml");
+
+            String dbUrl = "jdbc:mysql://" + ip + ":" + port + "/wigellsconcert?createDatabaseIfNotExist=true";
+
+            // Replace placeholders in hibernate.cfg.xml
+            configuration.setProperty("hibernate.connection.url", dbUrl);
+            configuration.setProperty("hibernate.connection.username", username);
+            configuration.setProperty("hibernate.connection.password", password);
+
+            sessionFactory = configuration.buildSessionFactory();
+            sessionFactory.openSession().close();
+
+            return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Database initialization failed: " + e.getMessage());
+            e.printStackTrace(); // For debugging
+            return false;
         }
     }
 
-    public static SessionFactory getSessionFactory() {
+    public static synchronized SessionFactory getSessionFactory() {
         return sessionFactory;
     }
 
-    public static void shutdown() {
-        getSessionFactory().close();
+    public static synchronized void shutdown() {
+        if (sessionFactory != null) {
+            sessionFactory.close();
+            sessionFactory = null;
+        }
     }
 }
 
