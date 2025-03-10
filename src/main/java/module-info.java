@@ -9,4 +9,6 @@ module com.example.wiggelsconcert {
     opens com.example.wiggelsconcert to javafx.fxml;
     opens com.example.wiggelsconcert.Entities to org.hibernate.orm.core;
     exports com.example.wiggelsconcert;
+    exports com.example.wiggelsconcert.DAO;
+    opens com.example.wiggelsconcert.DAO to javafx.fxml;
 }
