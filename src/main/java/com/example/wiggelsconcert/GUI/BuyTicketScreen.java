@@ -1,36 +1,62 @@
 package com.example.wiggelsconcert.GUI;
 
+import com.example.wiggelsconcert.Entities.*;
+import com.example.wiggelsconcert.DAO.*;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
+import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import org.hibernate.Session;
 
-import static com.example.wiggelsconcert.Main.sessionFactory;
+import java.util.stream.Collectors;
 
 public class BuyTicketScreen {
+    private static final CustomerDAO customerDAO = new CustomerDAO();
+    private static final ConcertDAO concertDAO = new ConcertDAO();
+    private static final WcDAO wcDAO = new WcDAO();
+
     public static void showBuyTicketScreen() {
         Stage stage = new Stage();
         VBox vbox = new VBox(10);
         vbox.setPadding(new Insets(10));
 
         Label label = new Label("Välj kund och konsert");
-        ListView<Kund> customersList = new ListView<>();
-        ListView<Konsert> concertsList = new ListView<>();
+        TextField customerSearch = new TextField();
+        customerSearch.setPromptText("Sök kund...");
+        ListView<Customer> customersList = new ListView<>();
+        ObservableList<Customer> customerData = FXCollections.observableArrayList(customerDAO.getAllCustomers());
+        TextField concertSearch = new TextField();
+        concertSearch.setPromptText("Sök konsert...");
+        ListView<Concert> concertsList = new ListView<>();
+        ObservableList<Concert> concertData = FXCollections.observableArrayList(concertDAO.getAllConcerts());
+
         Button confirmButton = new Button("Bekräfta köp");
 
-        Session session = sessionFactory.openSession();
-        customersList.getItems().addAll(session.createQuery("FROM Kund", Kund.class).list());
-        concertsList.getItems().addAll(session.createQuery("FROM Konsert", Konsert.class).list());
-        session.close();
+        customersList.setItems(customerData);
+        concertsList.setItems(concertData);
+
+        customerSearch.textProperty().addListener((observable, oldValue, newValue) -> {
+            customersList.setItems(FXCollections.observableArrayList(
+                    customerData.stream()
+                            .filter(k -> k.getFirst_name().toLowerCase().contains(newValue.toLowerCase()) ||
+                                    k.getLast_name().toLowerCase().contains(newValue.toLowerCase()))
+                            .collect(Collectors.toList())
+            ));
+        });
+
+        concertSearch.textProperty().addListener((observable, oldValue, newValue) -> {
+            concertsList.setItems(FXCollections.observableArrayList(
+                    concertData.stream()
+                            .filter(c -> c.getArtist().toLowerCase().contains(newValue.toLowerCase()))
+                            .collect(Collectors.toList())
+            ));
+        });
 
         confirmButton.setOnAction(e -> {
-            Kund selectedCustomer = customersList.getSelectionModel().getSelectedItem();
-            Konsert selectedConcert = concertsList.getSelectionModel().getSelectedItem();
+            Customer selectedCustomer = customersList.getSelectionModel().getSelectedItem();
+            Concert selectedConcert = concertsList.getSelectionModel().getSelectedItem();
             if (selectedCustomer != null && selectedConcert != null) {
                 buyTicket(selectedCustomer, selectedConcert);
             } else {
@@ -39,14 +65,18 @@ public class BuyTicketScreen {
             }
         });
 
-        vbox.getChildren().addAll(label, customersList, concertsList, confirmButton);
+        vbox.getChildren().addAll(label, customerSearch, customersList, concertSearch, concertsList, confirmButton);
         Scene scene = new Scene(vbox, 400, 400);
         stage.setScene(scene);
         stage.setTitle("Köp biljett");
         stage.show();
     }
 
-    private static void buyTicket(Kund customer, Konsert concert) {
-        // TODO: Implementation needed
+    private static void buyTicket(Customer customer, Concert concert) {
+        WC wcEntry = new WC("Biljettköp", customer, concert); // Is this the correct use for the name field?
+        wcDAO.saveWc(wcEntry);
+
+        Alert alert = new Alert(Alert.AlertType.INFORMATION, "Biljett köpt!");
+        alert.show();
     }
 }

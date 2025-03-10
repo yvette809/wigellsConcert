@@ -1,5 +1,6 @@
 package com.example.wiggelsconcert.GUI;
 
+import com.example.wiggelsconcert.Entities.*;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -18,14 +19,16 @@ public class MainMenuScreen {
         Button manageAddressesButton = new Button("Hantera adresser");
         Button manageConcertsButton = new Button("Hantera konserter");
         Button manageArenasButton = new Button("Hantera arenor");
+        Button manageWCButton = new Button("Hantera WC");
 
         buyTicketButton.setOnAction(e -> BuyTicketScreen.showBuyTicketScreen());
-//        manageCustomersButton.setOnAction(e -> showManagementScreen("Hantera kunder", Kund.class)); // We need to know how the hibernate classes will look
-//        manageAddressesButton.setOnAction(e -> showManagementScreen("Hantera adresser", Adress.class));
-//        manageConcertsButton.setOnAction(e -> showManagementScreen("Hantera konserter", Konsert.class));
-//        manageArenasButton.setOnAction(e -> showManagementScreen("Hantera arenor", Arena.class));
+        manageCustomersButton.setOnAction(e -> ManagementScreen.showManagementScreen("Hantera kunder", Customer.class));
+        manageAddressesButton.setOnAction(e -> ManagementScreen.showManagementScreen("Hantera adresser", Address.class));
+        manageConcertsButton.setOnAction(e -> ManagementScreen.showManagementScreen("Hantera konserter", Concert.class));
+        manageArenasButton.setOnAction(e -> ManagementScreen.showManagementScreen("Hantera arenor", Arena.class));
+        manageWCButton.setOnAction(e -> ManagementScreen.showManagementScreen("Hantera WC", WC.class));
 
-        vbox.getChildren().addAll(label, buyTicketButton, manageCustomersButton, manageAddressesButton, manageConcertsButton, manageArenasButton);
+        vbox.getChildren().addAll(label, buyTicketButton, manageCustomersButton, manageAddressesButton, manageConcertsButton, manageArenasButton, manageWCButton);
         Scene scene = new Scene(vbox, 300, 250);
         primaryStage.setScene(scene);
         primaryStage.show();

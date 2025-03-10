@@ -1,5 +1,6 @@
 package com.example.wiggelsconcert.GUI;
 
+import com.example.wiggelsconcert.Main;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -24,7 +25,7 @@ public class LoginScreen {
         loginButton.setOnAction(e -> {
             String username = userField.getText();
             String password = passField.getText();
-            if (true/*TODO: database connection logic*/) {
+            if (Main.initializeDatabase(username, password)) {
                 loginStage.close();
                 MainMenuScreen.showMainMenu(primaryStage);
             } else {
