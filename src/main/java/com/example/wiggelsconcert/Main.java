@@ -22,12 +22,15 @@ public class Main extends Application {
         LoginScreen.showLoginScreen(primaryStage);
     }
 
-    public static boolean initializeDatabase(String username, String password) {
+    public static boolean initializeDatabase(String username, String password, String ip, String port) {
         try {
             Configuration configuration = new Configuration();
             configuration.configure("hibernate.cfg.xml");
 
+            String dbUrl = "jdbc:mysql://" + ip + ":" + port + "/wigellsconcert?createDatabaseIfNotExist=true";
+
             // Replace placeholders in hibernate.cfg.xml
+            configuration.setProperty("hibernate.connection.url", dbUrl);
             configuration.setProperty("hibernate.connection.username", username);
             configuration.setProperty("hibernate.connection.password", password);
 

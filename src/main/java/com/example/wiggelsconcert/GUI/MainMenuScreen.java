@@ -29,7 +29,7 @@ public class MainMenuScreen {
         manageWCButton.setOnAction(e -> ManagementScreen.showManagementScreen("Hantera WC", WC.class));
 
         vbox.getChildren().addAll(label, buyTicketButton, manageCustomersButton, manageAddressesButton, manageConcertsButton, manageArenasButton, manageWCButton);
-        Scene scene = new Scene(vbox, 300, 250);
+        Scene scene = new Scene(vbox, 300, 300);
         primaryStage.setScene(scene);
         primaryStage.show();
     }

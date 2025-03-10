@@ -110,7 +110,7 @@ public class ManagementScreen {
         });
 
         vbox.getChildren().add(saveButton);
-        Scene scene = new Scene(vbox, 300, 400);
+        Scene scene = new Scene(vbox, 300, 150 + (entityFields.length * 50));
         stage.setScene(scene);
         stage.setTitle("Formulär");
         stage.show();
