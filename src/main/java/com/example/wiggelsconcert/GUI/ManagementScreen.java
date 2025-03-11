@@ -31,24 +31,24 @@ public class ManagementScreen {
         vbox.setPadding(new Insets(10));
 
         Label label = new Label(title);
-        ListView<T> listView = new ListView<>();
-        Button addButton = new Button("Lägg till");
-        Button updateButton = new Button("Uppdatera");
+        ObservableList<T> observableList = FXCollections.observableArrayList(fetchEntities(entityClass));
+        ListView<T> listView = new ListView<>(observableList);
+        Button addButton = new Button("Lägg till ny");
+        Button updateButton = new Button("Uppdatera/Se info");
         Button deleteButton = new Button("Ta bort");
 
-        // Disable deleting addresses as that will lead to issues
+        // Disable these since it will only lead to issues down the line
         if (title.equals("Hantera adresser")) {
             deleteButton.setDisable(true);
+        } else if (title.equals("Hantera WC")) {
+            addButton.setDisable(true);
         }
 
-        List<T> items = fetchEntities(entityClass);
-        listView.getItems().addAll(items);
-
-        addButton.setOnAction(e -> showEntityForm(entityClass, null));
+        addButton.setOnAction(e -> showEntityForm(entityClass, null, observableList));
         updateButton.setOnAction(e -> {
             T selectedEntity = listView.getSelectionModel().getSelectedItem();
             if (selectedEntity != null) {
-                showEntityForm(entityClass, selectedEntity);
+                showEntityForm(entityClass, selectedEntity, observableList);
             }
         });
         deleteButton.setOnAction(e -> deleteEntity(listView.getSelectionModel().getSelectedItem(), entityClass));
@@ -69,7 +69,7 @@ public class ManagementScreen {
         return List.of();
     }
 
-    private static <T> void showEntityForm(Class<T> entityClass, T entity) {
+    private static <T> void showEntityForm(Class<T> entityClass, T entity, ObservableList<T> observableList) {
         Stage stage = new Stage();
         VBox vbox = new VBox(10);
         vbox.setPadding(new Insets(10));
@@ -116,6 +116,7 @@ public class ManagementScreen {
                     }
                 }
                 saveOrUpdateEntity(newInstance, entityClass);
+                observableList.setAll(fetchEntities(entityClass));
                 stage.close();
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -164,11 +165,6 @@ public class ManagementScreen {
                 vbox.getChildren().addAll(fieldLabel, checkBox);
             } else if (field.getType() == int.class || field.getType() == Integer.class || field.getType() == double.class || field.getType() == Double.class) {
                 TextField numericField = new TextField();
-                numericField.textProperty().addListener((observable, oldValue, newValue) -> {
-                    if (!newValue.matches("\\d*")) {
-                        numericField.setText(oldValue);
-                    }
-                });
                 if (entity != null) {
                     try {
                         numericField.setText(field.get(entity).toString());
@@ -251,7 +247,7 @@ public class ManagementScreen {
     // We use the fact that new entities don't yet have an id to tell new and old entries apart
     private static <T> void saveOrUpdateEntity(T entity, Class<T> entityClass) {
         if (entityClass == Customer.class) {
-            if (((Customer) entity).getId() == 0) customerDAO.saveCustomer((Customer) entity);
+            if (((Customer) entity).getCustomer_id() == 0) customerDAO.saveCustomer((Customer) entity);
             else customerDAO.updateCustomer((Customer) entity);
         } else if (entityClass == Concert.class) {
             if (((Concert) entity).getConcert_id() == 0) concertDAO.saveConcert((Concert) entity);
@@ -272,7 +268,7 @@ public class ManagementScreen {
 
     private static <T> void deleteEntity(T entity, Class<T> entityClass) {
         if (entity == null) return;
-        if (entityClass == Customer.class) customerDAO.deleteCustomer(((Customer) entity).getId());
+        if (entityClass == Customer.class) customerDAO.deleteCustomer(((Customer) entity).getCustomer_id());
         else if (entityClass == Concert.class) concertDAO.deleteConcert(((Concert) entity).getConcert_id());
         else if (entityClass == Arena.class) arenaDAO.deleteArena(((Arena) entity).getArena_id());
         else if (entityClass == WC.class) wcDAO.deleteWc(((WC) entity).getWc_id());
