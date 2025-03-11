@@ -1,4 +1,4 @@
-package com.example.wiggelsconcert.Logic;
+package com.example.wiggelsconcert.utils;
 
 import com.example.wiggelsconcert.DAO.WcDAO;
 import com.example.wiggelsconcert.Entities.Concert;
@@ -20,6 +20,18 @@ public class WcOperations {
             }
         }
         return customerList;
+    }
+
+    public List<Concert> getConcertByCustomer(Customer customer) {
+        WcDAO wcDAO = new WcDAO();
+        List<WC> wclist = wcDAO.getAllWcRegistrations();
+        List<Concert> concertList = new ArrayList<>();
+        for (WC wc : wclist) {
+            if (wc.getCustomer().getId() == customer.getId()) {
+                concertList.add(wc.getConcert());
+            }
+        }
+        return concertList;
     }
 
 
