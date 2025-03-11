@@ -36,9 +36,11 @@ public class ManagementScreen {
         Button updateButton = new Button("Uppdatera");
         Button deleteButton = new Button("Ta bort");
 
-        // Disable deleting addresses as that will lead to issues
+        // Disable these since it will only lead to issues down the line
         if (title.equals("Hantera adresser")) {
             deleteButton.setDisable(true);
+        } else if (title.equals("Hantera WC")) {
+            addButton.setDisable(true);
         }
 
         List<T> items = fetchEntities(entityClass);
