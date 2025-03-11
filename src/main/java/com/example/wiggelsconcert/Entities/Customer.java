@@ -14,7 +14,7 @@ public class Customer {
     private LocalDate birth_day;
     private String phone_number;
 
-    @OneToOne (cascade = CascadeType.ALL)
+    @ManyToOne (cascade = CascadeType.MERGE)
     @JoinColumn(name = "address_id")
     private Address address;
 
