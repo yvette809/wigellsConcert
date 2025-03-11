@@ -166,11 +166,6 @@ public class ManagementScreen {
                 vbox.getChildren().addAll(fieldLabel, checkBox);
             } else if (field.getType() == int.class || field.getType() == Integer.class || field.getType() == double.class || field.getType() == Double.class) {
                 TextField numericField = new TextField();
-                numericField.textProperty().addListener((observable, oldValue, newValue) -> {
-                    if (!newValue.matches("\\d*")) {
-                        numericField.setText(oldValue);
-                    }
-                });
                 if (entity != null) {
                     try {
                         numericField.setText(field.get(entity).toString());
