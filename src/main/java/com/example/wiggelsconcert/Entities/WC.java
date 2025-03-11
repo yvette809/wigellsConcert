@@ -63,4 +63,8 @@ public class WC {
     public void setConcert(Concert concert) {
         this.concert = concert;
     }
+
+    public String toString() {
+        return this.customer.toString() + " " + this.concert.toString();
+    }
 }
