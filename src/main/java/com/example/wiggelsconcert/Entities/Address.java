@@ -68,4 +68,9 @@ public class Address {
     public void setRegion(String region) {
         this.region = region;
     }
+
+    @Override
+    public String toString() {
+        return this.street + " " + this.number + ", " + this.zip_code + " " + this.region;
+    }
 }

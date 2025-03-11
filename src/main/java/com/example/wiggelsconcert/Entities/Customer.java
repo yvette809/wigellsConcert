@@ -76,4 +76,9 @@ public class Customer {
     public void setAddress(Address address) {
         this.address = address;
     }
+
+    @Override
+    public String toString() {
+        return this.first_name + " " + this.last_name;
+    }
 }
