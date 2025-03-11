@@ -31,7 +31,8 @@ public class ManagementScreen {
         vbox.setPadding(new Insets(10));
 
         Label label = new Label(title);
-        ListView<T> listView = new ListView<>();
+        ObservableList<T> observableList = FXCollections.observableArrayList(fetchEntities(entityClass));
+        ListView<T> listView = new ListView<>(observableList);
         Button addButton = new Button("Lägg till");
         Button updateButton = new Button("Uppdatera");
         Button deleteButton = new Button("Ta bort");
@@ -43,14 +44,11 @@ public class ManagementScreen {
             addButton.setDisable(true);
         }
 
-        List<T> items = fetchEntities(entityClass);
-        listView.getItems().addAll(items);
-
-        addButton.setOnAction(e -> showEntityForm(entityClass, null));
+        addButton.setOnAction(e -> showEntityForm(entityClass, null, observableList));
         updateButton.setOnAction(e -> {
             T selectedEntity = listView.getSelectionModel().getSelectedItem();
             if (selectedEntity != null) {
-                showEntityForm(entityClass, selectedEntity);
+                showEntityForm(entityClass, selectedEntity, observableList);
             }
         });
         deleteButton.setOnAction(e -> deleteEntity(listView.getSelectionModel().getSelectedItem(), entityClass));
@@ -71,7 +69,7 @@ public class ManagementScreen {
         return List.of();
     }
 
-    private static <T> void showEntityForm(Class<T> entityClass, T entity) {
+    private static <T> void showEntityForm(Class<T> entityClass, T entity, ObservableList<T> observableList) {
         Stage stage = new Stage();
         VBox vbox = new VBox(10);
         vbox.setPadding(new Insets(10));
@@ -118,6 +116,7 @@ public class ManagementScreen {
                     }
                 }
                 saveOrUpdateEntity(newInstance, entityClass);
+                observableList.setAll(fetchEntities(entityClass));
                 stage.close();
             } catch (Exception ex) {
                 ex.printStackTrace();
