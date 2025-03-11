@@ -4,8 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="da6eeb10-8cbf-4d71-bdfe-1669fb6230d9" name="Changes" comment="doas creation completed">
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/wiggelsconcert/Logic/WcOperations.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/wiggelsconcert/utils/WcOperations.java" afterDir="false" />
+    <list default="true" id="da6eeb10-8cbf-4d71-bdfe-1669fb6230d9" name="Changes" comment="logiken för att ta fram alla kunder som köpt biljett till specifik konsert">
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/wiggelsconcert/utils/WcOperations.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/wiggelsconcert/utils/WcOperations.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -188,7 +188,14 @@
       <option name="presentableId" value="LOCAL−00006" />
       <updated>1741547172873</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL−00007" summary="logiken för att ta fram alla kunder som köpt biljett till specifik konsert">
+      <option name="closed" value="true" />
+      <created>1741696763979</created>
+      <option name="number" value="LOCAL−00007" />
+      <option name="presentableId" value="LOCAL−00007" />
+      <updated>1741696763979</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -200,6 +207,7 @@
     <MESSAGE value="AddressDAO created" />
     <MESSAGE value="ArenaDAO created" />
     <MESSAGE value="doas creation completed" />
-    <option name="LAST_COMMIT_MESSAGE" value="doas creation completed" />
+    <MESSAGE value="logiken för att ta fram alla kunder som köpt biljett till specifik konsert" />
+    <option name="LAST_COMMIT_MESSAGE" value="logiken för att ta fram alla kunder som köpt biljett till specifik konsert" />
   </component>
 </project>
