@@ -27,7 +27,7 @@ public class WcOperations {
         List<WC> wclist = wcDAO.getAllWcRegistrations();
         List<Concert> concertList = new ArrayList<>();
         for (WC wc : wclist) {
-            if (wc.getCustomer().getId() == customer.getId()) {
+            if (wc.getCustomer().getCustomer_id() == customer.getCustomer_id()) {
                 concertList.add(wc.getConcert());
             }
         }
