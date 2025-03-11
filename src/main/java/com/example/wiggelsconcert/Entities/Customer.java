@@ -29,11 +29,11 @@ public class Customer {
         this.phone_number = phone_number;
     }
 
-    public int getId() {
+    public int getCustomer_id() {
         return customer_id;
     }
 
-    public void setId(int id) {
+    public void setCustomer_id(int id) {
         this.customer_id = id;
     }
 
