@@ -33,8 +33,8 @@ public class ManagementScreen {
         Label label = new Label(title);
         ObservableList<T> observableList = FXCollections.observableArrayList(fetchEntities(entityClass));
         ListView<T> listView = new ListView<>(observableList);
-        Button addButton = new Button("Lägg till");
-        Button updateButton = new Button("Uppdatera");
+        Button addButton = new Button("Lägg till ny");
+        Button updateButton = new Button("Uppdatera/Se info");
         Button deleteButton = new Button("Ta bort");
 
         // Disable these since it will only lead to issues down the line
@@ -247,7 +247,7 @@ public class ManagementScreen {
     // We use the fact that new entities don't yet have an id to tell new and old entries apart
     private static <T> void saveOrUpdateEntity(T entity, Class<T> entityClass) {
         if (entityClass == Customer.class) {
-            if (((Customer) entity).getId() == 0) customerDAO.saveCustomer((Customer) entity);
+            if (((Customer) entity).getCustomer_id() == 0) customerDAO.saveCustomer((Customer) entity);
             else customerDAO.updateCustomer((Customer) entity);
         } else if (entityClass == Concert.class) {
             if (((Concert) entity).getConcert_id() == 0) concertDAO.saveConcert((Concert) entity);
@@ -268,7 +268,7 @@ public class ManagementScreen {
 
     private static <T> void deleteEntity(T entity, Class<T> entityClass) {
         if (entity == null) return;
-        if (entityClass == Customer.class) customerDAO.deleteCustomer(((Customer) entity).getId());
+        if (entityClass == Customer.class) customerDAO.deleteCustomer(((Customer) entity).getCustomer_id());
         else if (entityClass == Concert.class) concertDAO.deleteConcert(((Concert) entity).getConcert_id());
         else if (entityClass == Arena.class) arenaDAO.deleteArena(((Arena) entity).getArena_id());
         else if (entityClass == WC.class) wcDAO.deleteWc(((WC) entity).getWc_id());
