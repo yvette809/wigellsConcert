@@ -38,9 +38,11 @@ public class MainMenuScreen {
         priceColumn.setCellValueFactory(cellData -> new SimpleObjectProperty(String.format("%.2f kr", cellData.getValue().getTicket_price())));
         TableColumn<Concert, String> arenaColumn = new TableColumn<>("Arena");
         arenaColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getArena().getName()));
+        TableColumn<Concert, String> arenaTypeColumn = new TableColumn<>("Typ");
+        arenaTypeColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getArena().getType()));
         TableColumn<Concert, Integer> ageLimitColumn = new TableColumn<>("Åldersgräns");
         ageLimitColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getAge_limit()));
-        concertTable.getColumns().addAll(artistColumn, dateColumn, priceColumn, arenaColumn, ageLimitColumn);
+        concertTable.getColumns().addAll(artistColumn, dateColumn, priceColumn, arenaColumn, arenaTypeColumn, ageLimitColumn);
 
         ObservableList<Concert> concerts = FXCollections.observableArrayList(concertDAO.getAllConcerts());
         concertTable.setItems(concerts);

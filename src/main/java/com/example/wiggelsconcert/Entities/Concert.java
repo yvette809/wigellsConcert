@@ -85,6 +85,6 @@ public class Concert {
 
     @Override
     public String toString() {
-        return this.artist + "@" + this.arena.toString() + " " + this.date.toString() + " " + this.ticket_price + "kr " + this.age_limit + "+";
+        return this.artist + "@" + this.arena.getName() + " " + this.date.toString();
     }
 }
