@@ -5,6 +5,7 @@ import com.example.wiggelsconcert.DAO.ConcertDAO;
 import com.example.wiggelsconcert.DAO.CustomerDAO;
 import com.example.wiggelsconcert.DAO.WcDAO;
 import com.example.wiggelsconcert.Entities.*;
+import com.example.wiggelsconcert.utils.WcOperations;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -65,14 +66,18 @@ public class MainMenuScreen {
         });
 
         Label loggedInLabel = new Label("Inte inloggad");
-        VBox loginSection = createLoginSection(buyTicketButton, loggedInLabel);
+        Label bookedConcertsLabel = new Label("Dina bokningar");
+        bookedConcertsLabel.setVisible(false);
+        ListView<Concert> bookedConcertsList = new ListView<>();
+        bookedConcertsList.setVisible(false);
+        VBox loginSection = createLoginSection(buyTicketButton, loggedInLabel, bookedConcertsList, bookedConcertsLabel);
 
         buyTicketButton.setOnAction(e -> {
             Concert selectedConcert = concertTable.getSelectionModel().getSelectedItem();
-            buyTicket(loggedInCustomer, selectedConcert);
+            buyTicket(loggedInCustomer, selectedConcert, bookedConcertsList, bookedConcertsLabel);
         });
 
-        customerVbox.getChildren().addAll(label, concertTable, searchField, loginSection, buyTicketButton);
+        customerVbox.getChildren().addAll(label, concertTable, searchField, buyTicketButton, loginSection, bookedConcertsLabel, bookedConcertsList);
         customerTab.setContent(customerVbox);
 
         // Admin tab
@@ -95,7 +100,7 @@ public class MainMenuScreen {
         adminTab.setContent(adminVbox);
 
         tabPane.getTabs().addAll(customerTab, adminTab);
-        Scene scene = new Scene(tabPane, 600, 400);
+        Scene scene = new Scene(tabPane, 600, 600);
         primaryStage.setScene(scene);
         primaryStage.show();
     }
@@ -103,8 +108,29 @@ public class MainMenuScreen {
     public static void updateConcertTable() {
         concerts.setAll(concertDAO.getAllConcerts());
     }
+    private static void updateBookedConcerts(ListView<Concert> bookedConcertsList) {
+        if (loggedInCustomer != null) {
+            WcOperations wcOperations = new WcOperations();
+            List<Concert> bookedConcerts = wcOperations.getConcertByCustomer(loggedInCustomer);
+            bookedConcertsList.setItems(FXCollections.observableArrayList(bookedConcerts));
+            bookedConcertsList.setVisible(true);
+        }
+    }
 
-    public static VBox createLoginSection(Button buyTicketButton, Label loggedInLabel) {
+    private static void updateLoginSection(Label loggedInLabel, Button existingCustomerButton, Button newCustomerButton, Button logoutButton, Button buyTicketButton, ListView<Concert> bookedConcertsList, Label bookedConcertsLabel) {
+        if (loggedInCustomer != null) {
+            loggedInLabel.setText("Inloggad som: " + loggedInCustomer.getFirst_name() + " " + loggedInCustomer.getLast_name());
+            existingCustomerButton.setVisible(false);
+            newCustomerButton.setVisible(false);
+            logoutButton.setVisible(true);
+            buyTicketButton.setVisible(true);
+            updateBookedConcerts(bookedConcertsList);
+            bookedConcertsList.setVisible(true);
+            bookedConcertsLabel.setVisible(true);
+        }
+    }
+
+    private static VBox createLoginSection(Button buyTicketButton, Label loggedInLabel, ListView<Concert> bookedConcertsList, Label bookedConcertsLabel) {
         VBox loginSection = new VBox(10);
         loginSection.setPadding(new Insets(10));
 
@@ -112,15 +138,15 @@ public class MainMenuScreen {
         Button newCustomerButton = new Button("Registrera dig");
         Button logoutButton = new Button("Logga ut");
         logoutButton.setVisible(false);
+        bookedConcertsList.setVisible(false);
+        bookedConcertsLabel.setVisible(false);
 
         existingCustomerButton.setOnAction(e -> {
-            showCustomerSelection(buyTicketButton, loggedInLabel);
-            updateLoginSection(loggedInLabel, existingCustomerButton, newCustomerButton, logoutButton, buyTicketButton);
+            showCustomerSelection(buyTicketButton, loggedInLabel, bookedConcertsList, bookedConcertsLabel);
         });
 
         newCustomerButton.setOnAction(e -> {
-            showNewCustomerForm(buyTicketButton, loggedInLabel);
-            updateLoginSection(loggedInLabel, existingCustomerButton, newCustomerButton, logoutButton, buyTicketButton);
+            showNewCustomerForm(buyTicketButton, loggedInLabel, bookedConcertsList, bookedConcertsLabel);
         });
 
         logoutButton.setOnAction(e -> {
@@ -130,23 +156,16 @@ public class MainMenuScreen {
             existingCustomerButton.setVisible(true);
             newCustomerButton.setVisible(true);
             logoutButton.setVisible(false);
+            bookedConcertsList.setVisible(false);
+            bookedConcertsList.getItems().clear();
+            bookedConcertsLabel.setVisible(false);
         });
 
         loginSection.getChildren().addAll(loggedInLabel, existingCustomerButton, newCustomerButton, logoutButton);
         return loginSection;
     }
 
-    private static void updateLoginSection(Label loggedInLabel, Button existingCustomerButton, Button newCustomerButton, Button logoutButton, Button buyTicketButton) {
-        if (loggedInCustomer != null) {
-            loggedInLabel.setText("Inloggad som: " + loggedInCustomer.getFirst_name() + " " + loggedInCustomer.getLast_name());
-            existingCustomerButton.setVisible(false);
-            newCustomerButton.setVisible(false);
-            logoutButton.setVisible(true);
-            buyTicketButton.setVisible(true);
-        }
-    }
-
-    private static void showCustomerSelection(Button buyTicketButton, Label loggedInLabel) {
+    private static void showCustomerSelection(Button buyTicketButton, Label loggedInLabel, ListView<Concert> bookedConcertsList, Label bookedConcertsLabel) {
         Stage stage = new Stage();
         VBox vbox = new VBox(10);
         vbox.setPadding(new javafx.geometry.Insets(10));
@@ -158,7 +177,10 @@ public class MainMenuScreen {
         selectButton.setOnAction(e -> {
             loggedInCustomer = customerListView.getSelectionModel().getSelectedItem();
             if (loggedInCustomer != null) {
-                updateLoginSection(loggedInLabel, (Button) ((VBox) loggedInLabel.getParent()).getChildren().get(1), (Button) ((VBox) loggedInLabel.getParent()).getChildren().get(2), (Button) ((VBox) loggedInLabel.getParent()).getChildren().get(3), buyTicketButton);
+                updateLoginSection(loggedInLabel, (Button) ((VBox) loggedInLabel.getParent()).getChildren().get(1),
+                        (Button) ((VBox) loggedInLabel.getParent()).getChildren().get(2),
+                        (Button) ((VBox) loggedInLabel.getParent()).getChildren().get(3),
+                        buyTicketButton, bookedConcertsList, bookedConcertsLabel);
                 stage.close();
             }
         });
@@ -170,7 +192,7 @@ public class MainMenuScreen {
         stage.show();
     }
 
-    private static void showNewCustomerForm(Button buyTicketButton, Label loggedInLabel) {
+    private static void showNewCustomerForm(Button buyTicketButton, Label loggedInLabel, ListView<Concert> bookedConcertsList, Label bookedConcertsLabel) {
         Stage stage = new Stage();
         VBox vbox = new VBox(10);
         vbox.setPadding(new Insets(10));
@@ -218,7 +240,10 @@ public class MainMenuScreen {
             newCustomer.setAddress(existingAddress);
             customerDAO.saveCustomer(newCustomer);
             loggedInCustomer = newCustomer;
-            updateLoginSection(loggedInLabel, (Button) ((VBox) loggedInLabel.getParent()).getChildren().get(1), (Button) ((VBox) loggedInLabel.getParent()).getChildren().get(2), (Button) ((VBox) loggedInLabel.getParent()).getChildren().get(3), buyTicketButton);
+            updateLoginSection(loggedInLabel, (Button) ((VBox) loggedInLabel.getParent()).getChildren().get(1),
+                    (Button) ((VBox) loggedInLabel.getParent()).getChildren().get(2),
+                    (Button) ((VBox) loggedInLabel.getParent()).getChildren().get(3),
+                    buyTicketButton, bookedConcertsList, bookedConcertsLabel);
             stage.close();
         });
 
@@ -230,7 +255,7 @@ public class MainMenuScreen {
         stage.show();
     }
 
-    private static void buyTicket(Customer customer, Concert concert) {
+    private static void buyTicket(Customer customer, Concert concert, ListView<Concert> bookedConcertsList, Label bookedConcertsLabel) {
         if (customer == null) {
             Alert alert = new Alert(Alert.AlertType.ERROR, "Du måste vara inloggad för att köpa en biljett!");
             alert.show();
@@ -250,5 +275,8 @@ public class MainMenuScreen {
                         "\nKonsert: " + concert.getArtist() +
                         "\nDatum: " + concert.getDate());
         alert.show();
+        updateBookedConcerts(bookedConcertsList);
+        bookedConcertsList.setVisible(true);
+        bookedConcertsLabel.setVisible(true);
     }
 }
