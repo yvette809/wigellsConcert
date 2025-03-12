@@ -319,20 +319,18 @@ public class ManagementScreen {
 
         if (entityClass == Address.class) {
             Address address = (Address) entity;
+            // Prevent deletion of addresses connected to customers and arenas
             List<Customer> customersUsingAddress = customerDAO.getAllCustomers().stream()
                     .filter(c -> c.getAddress() != null && c.getAddress().getAddress_id() == address.getAddress_id())
                     .collect(Collectors.toList());
-
             List<Arena> arenasUsingAddress = arenaDAO.getAllArenas().stream()
                     .filter(a -> a.getAddress() != null && a.getAddress().getAddress_id() == address.getAddress_id())
                     .collect(Collectors.toList());
 
             if (!customersUsingAddress.isEmpty() || !arenasUsingAddress.isEmpty()) {
                 StringBuilder warningMessage = new StringBuilder("Adressen används av:\n");
-
                 customersUsingAddress.forEach(c -> warningMessage.append(" - Kund: ").append(c.getFirst_name()).append(" ").append(c.getLast_name()).append("\n"));
                 arenasUsingAddress.forEach(a -> warningMessage.append(" - Arena: ").append(a.getName()).append("\n"));
-
                 warningMessage.append("och kan därför inte tas bort!");
 
                 Alert alert = new Alert(Alert.AlertType.WARNING, warningMessage.toString());
@@ -342,15 +340,35 @@ public class ManagementScreen {
 
             addressDAO.deleteAddress(address.getAddress_id());
         } else if (entityClass == Customer.class) {
-            customerDAO.deleteCustomer(((Customer) entity).getCustomer_id());
+            Customer customer = (Customer) entity;
+            // Delete all booking connected to the customer we delete
+            List<WC> customerBookings = wcDAO.getAllWcRegistrations().stream()
+                    .filter(wc -> wc.getCustomer().getCustomer_id() == customer.getCustomer_id())
+                    .collect(Collectors.toList());
+            customerBookings.forEach(wc -> wcDAO.deleteWc(wc.getWc_id()));
+
+            customerDAO.deleteCustomer(customer.getCustomer_id());
+
         } else if (entityClass == Concert.class) {
             concertDAO.deleteConcert(((Concert) entity).getConcert_id());
         } else if (entityClass == Arena.class) {
-            arenaDAO.deleteArena(((Arena) entity).getArena_id());
+            Arena arena = (Arena) entity;
+            // We prevent deletion of arenas with planned concerts
+            List<Concert> concertsAtArena = concertDAO.getAllConcerts().stream()
+                    .filter(c -> c.getArena() != null && c.getArena().getArena_id() == arena.getArena_id())
+                    .collect(Collectors.toList());
+            if (!concertsAtArena.isEmpty()) {
+                StringBuilder warningMessage = new StringBuilder("Arenan har planerade konserter och kan därför inte tas bort:\n");
+                concertsAtArena.forEach(c -> warningMessage.append(" - Konsert: ").append(c.getArtist()).append(", ").append(c.getDate()).append("\n"));
+                Alert alert = new Alert(Alert.AlertType.WARNING, warningMessage.toString());
+                alert.show();
+                return;
+            }
+
+            arenaDAO.deleteArena(arena.getArena_id());
         } else if (entityClass == WC.class) {
             wcDAO.deleteWc(((WC) entity).getWc_id());
         }
-
         Alert alert = new Alert(Alert.AlertType.INFORMATION, "Borttaget: " + entity.toString());
         alert.show();
     }
