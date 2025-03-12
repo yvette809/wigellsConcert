@@ -16,6 +16,7 @@ import javafx.scene.layout.VBox;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.stage.Stage;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public class MainMenuScreen {
@@ -27,6 +28,9 @@ public class MainMenuScreen {
     private static ObservableList<Concert> concerts = FXCollections.observableArrayList();
 
     public static void showMainMenu(Stage primaryStage) {
+        // Remove past concerts since they are no longer bookable
+        removePastConcerts();
+
         TabPane tabPane = new TabPane();
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
         // Customer tab
@@ -307,5 +311,17 @@ public class MainMenuScreen {
         stage.setScene(scene);
         stage.setTitle("Bokningar");
         stage.show();
+    }
+
+    public static void removePastConcerts() {
+        List<Concert> allConcerts = concertDAO.getAllConcerts();
+        LocalDate today = LocalDate.now();
+
+        for (Concert concert : allConcerts) {
+            if (concert.getDate().isBefore(today)) {
+                concertDAO.deleteConcert(concert.getConcert_id());
+                System.out.println("Raderade gammal konsert: " + concert.getArtist() + " den " + concert.getDate());
+            }
+        }
     }
 }
