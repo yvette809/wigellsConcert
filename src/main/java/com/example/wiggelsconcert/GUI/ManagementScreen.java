@@ -2,6 +2,7 @@ package com.example.wiggelsconcert.GUI;
 
 import com.example.wiggelsconcert.DAO.*;
 import com.example.wiggelsconcert.Entities.*;
+import com.example.wiggelsconcert.utils.WcOperations;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -316,6 +317,7 @@ public class ManagementScreen {
 
     private static <T> void deleteEntity(T entity, Class<T> entityClass) {
         if (entity == null) return;
+        WcOperations wcOperations = new WcOperations();
 
         if (entityClass == Address.class) {
             Address address = (Address) entity;
@@ -337,8 +339,8 @@ public class ManagementScreen {
                 alert.show();
                 return;
             }
-
             addressDAO.deleteAddress(address.getAddress_id());
+
         } else if (entityClass == Customer.class) {
             Customer customer = (Customer) entity;
             // Delete all booking connected to the customer we delete
@@ -346,11 +348,20 @@ public class ManagementScreen {
                     .filter(wc -> wc.getCustomer().getCustomer_id() == customer.getCustomer_id())
                     .collect(Collectors.toList());
             customerBookings.forEach(wc -> wcDAO.deleteWc(wc.getWc_id()));
-
             customerDAO.deleteCustomer(customer.getCustomer_id());
 
         } else if (entityClass == Concert.class) {
-            concertDAO.deleteConcert(((Concert) entity).getConcert_id());
+            Concert concert = (Concert) entity;
+            // Prevent deletion of a concert with bookings
+            List<Customer> customersWithBookings = wcOperations.getCustomerByConcert(concert);
+            if (!customersWithBookings.isEmpty()) {
+                Alert alert = new Alert(Alert.AlertType.WARNING,
+                        "Du måste först ta bort alla bokningar till denna konsert innan den kan tas bort!");
+                alert.show();
+                return;
+            }
+            concertDAO.deleteConcert(concert.getConcert_id());
+
         } else if (entityClass == Arena.class) {
             Arena arena = (Arena) entity;
             // We prevent deletion of arenas with planned concerts
@@ -364,8 +375,8 @@ public class ManagementScreen {
                 alert.show();
                 return;
             }
-
             arenaDAO.deleteArena(arena.getArena_id());
+
         } else if (entityClass == WC.class) {
             wcDAO.deleteWc(((WC) entity).getWc_id());
         }
