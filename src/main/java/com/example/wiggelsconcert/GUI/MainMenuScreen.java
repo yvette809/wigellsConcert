@@ -1,6 +1,9 @@
 package com.example.wiggelsconcert.GUI;
 
+import com.example.wiggelsconcert.DAO.AddressDAO;
 import com.example.wiggelsconcert.DAO.ConcertDAO;
+import com.example.wiggelsconcert.DAO.CustomerDAO;
+import com.example.wiggelsconcert.DAO.WcDAO;
 import com.example.wiggelsconcert.Entities.*;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -16,6 +19,11 @@ import java.util.List;
 
 public class MainMenuScreen {
     private static final ConcertDAO concertDAO = new ConcertDAO();
+    private static final AddressDAO addressDAO = new AddressDAO();
+    private static final CustomerDAO customerDAO = new CustomerDAO();
+    private static final WcDAO wcDAO = new WcDAO();
+    private static Customer loggedInCustomer = null;
+    private static ObservableList<Concert> concerts = FXCollections.observableArrayList();
 
     public static void showMainMenu(Stage primaryStage) {
         TabPane tabPane = new TabPane();
@@ -29,6 +37,7 @@ public class MainMenuScreen {
         TextField searchField = new TextField();
         searchField.setPromptText("Sök konsert...");
         Button buyTicketButton = new Button("Köp biljett");
+        buyTicketButton.setVisible(false);
 
         TableColumn<Concert, String> artistColumn = new TableColumn<>("Artist");
         artistColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getArtist()));
@@ -44,7 +53,7 @@ public class MainMenuScreen {
         ageLimitColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getAge_limit()));
         concertTable.getColumns().addAll(artistColumn, dateColumn, priceColumn, arenaColumn, arenaTypeColumn, ageLimitColumn);
 
-        ObservableList<Concert> concerts = FXCollections.observableArrayList(concertDAO.getAllConcerts());
+        concerts.setAll(concertDAO.getAllConcerts());
         concertTable.setItems(concerts);
 
         searchField.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -55,9 +64,15 @@ public class MainMenuScreen {
             concertTable.setItems(FXCollections.observableArrayList(filteredList));
         });
 
-        buyTicketButton.setOnAction(e -> BuyTicketScreen.showBuyTicketScreen());
+        Label loggedInLabel = new Label("Inte inloggad");
+        VBox loginSection = createLoginSection(buyTicketButton, loggedInLabel);
 
-        customerVbox.getChildren().addAll(label, concertTable, searchField, buyTicketButton);
+        buyTicketButton.setOnAction(e -> {
+            Concert selectedConcert = concertTable.getSelectionModel().getSelectedItem();
+            buyTicket(loggedInCustomer, selectedConcert);
+        });
+
+        customerVbox.getChildren().addAll(label, concertTable, searchField, loginSection, buyTicketButton);
         customerTab.setContent(customerVbox);
 
         // Admin tab
@@ -83,5 +98,157 @@ public class MainMenuScreen {
         Scene scene = new Scene(tabPane, 600, 400);
         primaryStage.setScene(scene);
         primaryStage.show();
+    }
+
+    public static void updateConcertTable() {
+        concerts.setAll(concertDAO.getAllConcerts());
+    }
+
+    public static VBox createLoginSection(Button buyTicketButton, Label loggedInLabel) {
+        VBox loginSection = new VBox(10);
+        loginSection.setPadding(new Insets(10));
+
+        Button existingCustomerButton = new Button("Logga in");
+        Button newCustomerButton = new Button("Registrera dig");
+        Button logoutButton = new Button("Logga ut");
+        logoutButton.setVisible(false);
+
+        existingCustomerButton.setOnAction(e -> {
+            showCustomerSelection(buyTicketButton, loggedInLabel);
+            updateLoginSection(loggedInLabel, existingCustomerButton, newCustomerButton, logoutButton, buyTicketButton);
+        });
+
+        newCustomerButton.setOnAction(e -> {
+            showNewCustomerForm(buyTicketButton, loggedInLabel);
+            updateLoginSection(loggedInLabel, existingCustomerButton, newCustomerButton, logoutButton, buyTicketButton);
+        });
+
+        logoutButton.setOnAction(e -> {
+            loggedInCustomer = null;
+            loggedInLabel.setText("Inte inloggad");
+            buyTicketButton.setVisible(false);
+            existingCustomerButton.setVisible(true);
+            newCustomerButton.setVisible(true);
+            logoutButton.setVisible(false);
+        });
+
+        loginSection.getChildren().addAll(loggedInLabel, existingCustomerButton, newCustomerButton, logoutButton);
+        return loginSection;
+    }
+
+    private static void updateLoginSection(Label loggedInLabel, Button existingCustomerButton, Button newCustomerButton, Button logoutButton, Button buyTicketButton) {
+        if (loggedInCustomer != null) {
+            loggedInLabel.setText("Inloggad som: " + loggedInCustomer.getFirst_name() + " " + loggedInCustomer.getLast_name());
+            existingCustomerButton.setVisible(false);
+            newCustomerButton.setVisible(false);
+            logoutButton.setVisible(true);
+            buyTicketButton.setVisible(true);
+        }
+    }
+
+    private static void showCustomerSelection(Button buyTicketButton, Label loggedInLabel) {
+        Stage stage = new Stage();
+        VBox vbox = new VBox(10);
+        vbox.setPadding(new javafx.geometry.Insets(10));
+
+        ListView<Customer> customerListView = new ListView<>();
+        customerListView.setItems(javafx.collections.FXCollections.observableArrayList(new CustomerDAO().getAllCustomers()));
+        Button selectButton = new Button("Välj");
+
+        selectButton.setOnAction(e -> {
+            loggedInCustomer = customerListView.getSelectionModel().getSelectedItem();
+            if (loggedInCustomer != null) {
+                updateLoginSection(loggedInLabel, (Button) ((VBox) loggedInLabel.getParent()).getChildren().get(1), (Button) ((VBox) loggedInLabel.getParent()).getChildren().get(2), (Button) ((VBox) loggedInLabel.getParent()).getChildren().get(3), buyTicketButton);
+                stage.close();
+            }
+        });
+
+        vbox.getChildren().addAll(new Label("Välj en kund:"), customerListView, selectButton);
+        Scene scene = new Scene(vbox, 300, 400);
+        stage.setScene(scene);
+        stage.setTitle("Välj Kund");
+        stage.show();
+    }
+
+    private static void showNewCustomerForm(Button buyTicketButton, Label loggedInLabel) {
+        Stage stage = new Stage();
+        VBox vbox = new VBox(10);
+        vbox.setPadding(new Insets(10));
+
+        TextField firstNameField = new TextField();
+        firstNameField.setPromptText("Förnamn");
+        TextField lastNameField = new TextField();
+        lastNameField.setPromptText("Efternamn");
+        DatePicker birthDatePicker = new DatePicker();
+        birthDatePicker.setPromptText("Födelsedatum");
+        TextField phoneNumberField = new TextField();
+        phoneNumberField.setPromptText("Telefonnummer");
+
+        TextField streetField = new TextField();
+        streetField.setPromptText("Gata");
+        TextField numberField = new TextField();
+        numberField.setPromptText("Husnummer");
+        TextField zipCodeField = new TextField();
+        zipCodeField.setPromptText("Postnummer");
+        TextField regionField = new TextField();
+        regionField.setPromptText("Stad");
+
+        Button registerButton = new Button("Registrera");
+
+        registerButton.setOnAction(e -> {
+            String street = streetField.getText();
+            String number = numberField.getText();
+            String zipCode = zipCodeField.getText();
+            String region = regionField.getText();
+
+            Address existingAddress = addressDAO.getAllAddresses().stream()
+                    .filter(a -> a.getStreet().equalsIgnoreCase(street) &&
+                            a.getNumber().equalsIgnoreCase(number) &&
+                            a.getZip_code().equalsIgnoreCase(zipCode) &&
+                            a.getRegion().equalsIgnoreCase(region))
+                    .findFirst()
+                    .orElse(null);
+
+            if (existingAddress == null) {
+                existingAddress = new Address(street, number, zipCode, region);
+                addressDAO.saveAddress(existingAddress);
+            }
+
+            Customer newCustomer = new Customer(firstNameField.getText(), lastNameField.getText(), birthDatePicker.getValue(), phoneNumberField.getText());
+            newCustomer.setAddress(existingAddress);
+            customerDAO.saveCustomer(newCustomer);
+            loggedInCustomer = newCustomer;
+            updateLoginSection(loggedInLabel, (Button) ((VBox) loggedInLabel.getParent()).getChildren().get(1), (Button) ((VBox) loggedInLabel.getParent()).getChildren().get(2), (Button) ((VBox) loggedInLabel.getParent()).getChildren().get(3), buyTicketButton);
+            stage.close();
+        });
+
+        vbox.getChildren().addAll(new Label("Registrera ny kund:"), firstNameField, lastNameField, birthDatePicker, phoneNumberField,
+                new Label("Adress:"), streetField, numberField, zipCodeField, regionField, registerButton);
+        Scene scene = new Scene(vbox, 350, 450);
+        stage.setScene(scene);
+        stage.setTitle("Registrera Kund");
+        stage.show();
+    }
+
+    private static void buyTicket(Customer customer, Concert concert) {
+        if (customer == null) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Du måste vara inloggad för att köpa en biljett!");
+            alert.show();
+            return;
+        }
+        if (concert == null) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Du måste välja en konsert för att köpa en biljett!");
+            alert.show();
+            return;
+        }
+
+        WC wcEntry = new WC("Biljettköp", customer, concert);
+        wcDAO.saveWc(wcEntry);
+
+        Alert alert = new Alert(Alert.AlertType.INFORMATION,
+                "Biljett köpt!\nKund: " + customer.getFirst_name() + " " + customer.getLast_name() +
+                        "\nKonsert: " + concert.getArtist() +
+                        "\nDatum: " + concert.getDate());
+        alert.show();
     }
 }

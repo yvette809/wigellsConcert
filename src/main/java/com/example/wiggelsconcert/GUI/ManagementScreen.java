@@ -83,6 +83,7 @@ public class ManagementScreen {
         vbox.getChildren().add(formFields);
 
         Button saveButton = new Button("Spara");
+        saveButton.setDisable(entityClass == WC.class); // Disable save button in WC since we don't want to add or update them manually
         saveButton.setOnAction(e -> {
             try {
                 for (Object input : fieldInputs.values()) {
@@ -237,6 +238,7 @@ public class ManagementScreen {
                         e.printStackTrace();
                     }
                 }
+                textField.setDisable(entityClass == WC.class); // Disable textfields in WC to stop manual manipulation of bookings
                 fieldInputs.put(field.getName(), textField);
                 vbox.getChildren().addAll(fieldLabel, textField);
             }
@@ -252,6 +254,7 @@ public class ManagementScreen {
         } else if (entityClass == Concert.class) {
             if (((Concert) entity).getConcert_id() == 0) concertDAO.saveConcert((Concert) entity);
             else concertDAO.updateConcert((Concert) entity);
+            MainMenuScreen.updateConcertTable();
         } else if (entityClass == Arena.class) {
             if (((Arena) entity).getArena_id() == 0) arenaDAO.saveArena((Arena) entity);
             else arenaDAO.updateArena((Arena) entity);
