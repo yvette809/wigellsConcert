@@ -18,6 +18,7 @@ import javafx.stage.Stage;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class MainMenuScreen {
     private static final ConcertDAO concertDAO = new ConcertDAO();
@@ -313,12 +314,22 @@ public class MainMenuScreen {
         stage.show();
     }
 
-    public static void removePastConcerts() {
+    private static void removePastConcerts() {
         List<Concert> allConcerts = concertDAO.getAllConcerts();
         LocalDate today = LocalDate.now();
 
         for (Concert concert : allConcerts) {
             if (concert.getDate().isBefore(today)) {
+                List<WC> relatedBookings = wcDAO.getAllWcRegistrations().stream()
+                        .filter(wc -> wc.getConcert().getConcert_id() == concert.getConcert_id())
+                        .collect(Collectors.toList());
+
+                // Delete all related bookings
+                for (WC wc : relatedBookings) {
+                    wcDAO.deleteWc(wc.getWc_id());
+                    System.out.println("Raderade bokning för kund: " + wc.getCustomer().getFirst_name() +
+                            " " + wc.getCustomer().getLast_name() + " till konsert: " + concert.getArtist());
+                }
                 concertDAO.deleteConcert(concert.getConcert_id());
                 System.out.println("Raderade gammal konsert: " + concert.getArtist() + " den " + concert.getDate());
             }
