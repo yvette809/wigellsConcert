@@ -2,6 +2,7 @@ package com.example.wiggelsconcert.GUI;
 
 import com.example.wiggelsconcert.DAO.*;
 import com.example.wiggelsconcert.Entities.*;
+import com.example.wiggelsconcert.utils.WcOperations;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -36,13 +37,6 @@ public class ManagementScreen {
         Button addButton = new Button("Lägg till ny");
         Button updateButton = new Button("Uppdatera/Se info");
         Button deleteButton = new Button("Ta bort");
-
-        // Disable these since it will only lead to issues down the line
-        if (title.equals("Hantera adresser")) {
-            deleteButton.setDisable(true);
-        } else if (title.equals("Hantera WC")) {
-            addButton.setDisable(true);
-        }
 
         addButton.setOnAction(e -> showEntityForm(entityClass, null, observableList));
         updateButton.setOnAction(e -> {
@@ -83,7 +77,6 @@ public class ManagementScreen {
         vbox.getChildren().add(formFields);
 
         Button saveButton = new Button("Spara");
-        saveButton.setDisable(entityClass == WC.class); // Disable save button in WC since we don't want to add or update them manually
         saveButton.setOnAction(e -> {
             try {
                 for (Object input : fieldInputs.values()) {
@@ -228,7 +221,61 @@ public class ManagementScreen {
                 }
 
                 fieldInputs.put(field.getName(), arenaComboBox);
-                vbox.getChildren().addAll(fieldLabel, searchField, arenaComboBox);
+                vbox.getChildren().addAll(fieldLabel, arenaComboBox, searchField);
+            } else if (field.getType() == Customer.class) {
+                ObservableList<Customer> customers = FXCollections.observableArrayList(customerDAO.getAllCustomers());
+                ComboBox<Customer> customerComboBox = new ComboBox<>(customers);
+                customerComboBox.setPrefWidth(300);
+
+                TextField searchField = new TextField();
+                searchField.setPromptText("Sök kund...");
+                searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+                    List<Customer> filteredList = customers.stream()
+                            .filter(c -> c.toString().toLowerCase().contains(newValue.toLowerCase()))
+                            .collect(Collectors.toList());
+                    customerComboBox.setItems(FXCollections.observableArrayList(filteredList));
+                });
+
+                if (entity != null) {
+                    try {
+                        Customer currentCustomer = (Customer) field.get(entity);
+                        if (currentCustomer != null) {
+                            customerComboBox.setValue(currentCustomer);
+                        }
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                fieldInputs.put(field.getName(), customerComboBox);
+                vbox.getChildren().addAll(fieldLabel, customerComboBox, searchField);
+            } else if (field.getType() == Concert.class) {
+                ObservableList<Concert> concerts = FXCollections.observableArrayList(concertDAO.getAllConcerts());
+                ComboBox<Concert> concertComboBox = new ComboBox<>(concerts);
+                concertComboBox.setPrefWidth(300);
+
+                TextField searchField = new TextField();
+                searchField.setPromptText("Sök konsert...");
+                searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+                    List<Concert> filteredList = concerts.stream()
+                            .filter(c -> c.getArtist().toLowerCase().contains(newValue.toLowerCase()))
+                            .collect(Collectors.toList());
+                    concertComboBox.setItems(FXCollections.observableArrayList(filteredList));
+                });
+
+                if (entity != null) {
+                    try {
+                        Concert currentConcert = (Concert) field.get(entity);
+                        if (currentConcert != null) {
+                            concertComboBox.setValue(currentConcert);
+                        }
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                fieldInputs.put(field.getName(), concertComboBox);
+                vbox.getChildren().addAll(fieldLabel, concertComboBox, searchField);
             } else {
                 TextField textField = new TextField();
                 if (entity != null) {
@@ -238,7 +285,6 @@ public class ManagementScreen {
                         e.printStackTrace();
                     }
                 }
-                textField.setDisable(entityClass == WC.class); // Disable textfields in WC to stop manual manipulation of bookings
                 fieldInputs.put(field.getName(), textField);
                 vbox.getChildren().addAll(fieldLabel, textField);
             }
@@ -271,10 +317,69 @@ public class ManagementScreen {
 
     private static <T> void deleteEntity(T entity, Class<T> entityClass) {
         if (entity == null) return;
-        if (entityClass == Customer.class) customerDAO.deleteCustomer(((Customer) entity).getCustomer_id());
-        else if (entityClass == Concert.class) concertDAO.deleteConcert(((Concert) entity).getConcert_id());
-        else if (entityClass == Arena.class) arenaDAO.deleteArena(((Arena) entity).getArena_id());
-        else if (entityClass == WC.class) wcDAO.deleteWc(((WC) entity).getWc_id());
+        WcOperations wcOperations = new WcOperations();
+
+        if (entityClass == Address.class) {
+            Address address = (Address) entity;
+            // Prevent deletion of addresses connected to customers and arenas
+            List<Customer> customersUsingAddress = customerDAO.getAllCustomers().stream()
+                    .filter(c -> c.getAddress() != null && c.getAddress().getAddress_id() == address.getAddress_id())
+                    .collect(Collectors.toList());
+            List<Arena> arenasUsingAddress = arenaDAO.getAllArenas().stream()
+                    .filter(a -> a.getAddress() != null && a.getAddress().getAddress_id() == address.getAddress_id())
+                    .collect(Collectors.toList());
+
+            if (!customersUsingAddress.isEmpty() || !arenasUsingAddress.isEmpty()) {
+                StringBuilder warningMessage = new StringBuilder("Adressen används av:\n");
+                customersUsingAddress.forEach(c -> warningMessage.append(" - Kund: ").append(c.getFirst_name()).append(" ").append(c.getLast_name()).append("\n"));
+                arenasUsingAddress.forEach(a -> warningMessage.append(" - Arena: ").append(a.getName()).append("\n"));
+                warningMessage.append("och kan därför inte tas bort!");
+
+                Alert alert = new Alert(Alert.AlertType.WARNING, warningMessage.toString());
+                alert.show();
+                return;
+            }
+            addressDAO.deleteAddress(address.getAddress_id());
+
+        } else if (entityClass == Customer.class) {
+            Customer customer = (Customer) entity;
+            // Delete all booking connected to the customer we delete
+            List<WC> customerBookings = wcDAO.getAllWcRegistrations().stream()
+                    .filter(wc -> wc.getCustomer().getCustomer_id() == customer.getCustomer_id())
+                    .collect(Collectors.toList());
+            customerBookings.forEach(wc -> wcDAO.deleteWc(wc.getWc_id()));
+            customerDAO.deleteCustomer(customer.getCustomer_id());
+
+        } else if (entityClass == Concert.class) {
+            Concert concert = (Concert) entity;
+            // Prevent deletion of a concert with bookings
+            List<Customer> customersWithBookings = wcOperations.getCustomerByConcert(concert);
+            if (!customersWithBookings.isEmpty()) {
+                Alert alert = new Alert(Alert.AlertType.WARNING,
+                        "Du måste först ta bort alla bokningar till denna konsert innan den kan tas bort!");
+                alert.show();
+                return;
+            }
+            concertDAO.deleteConcert(concert.getConcert_id());
+
+        } else if (entityClass == Arena.class) {
+            Arena arena = (Arena) entity;
+            // We prevent deletion of arenas with planned concerts
+            List<Concert> concertsAtArena = concertDAO.getAllConcerts().stream()
+                    .filter(c -> c.getArena() != null && c.getArena().getArena_id() == arena.getArena_id())
+                    .collect(Collectors.toList());
+            if (!concertsAtArena.isEmpty()) {
+                StringBuilder warningMessage = new StringBuilder("Arenan har planerade konserter och kan därför inte tas bort:\n");
+                concertsAtArena.forEach(c -> warningMessage.append(" - Konsert: ").append(c.getArtist()).append(", ").append(c.getDate()).append("\n"));
+                Alert alert = new Alert(Alert.AlertType.WARNING, warningMessage.toString());
+                alert.show();
+                return;
+            }
+            arenaDAO.deleteArena(arena.getArena_id());
+
+        } else if (entityClass == WC.class) {
+            wcDAO.deleteWc(((WC) entity).getWc_id());
+        }
         Alert alert = new Alert(Alert.AlertType.INFORMATION, "Borttaget: " + entity.toString());
         alert.show();
     }

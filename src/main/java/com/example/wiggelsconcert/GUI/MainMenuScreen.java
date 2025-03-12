@@ -16,6 +16,7 @@ import javafx.scene.layout.VBox;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.stage.Stage;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public class MainMenuScreen {
@@ -27,6 +28,9 @@ public class MainMenuScreen {
     private static ObservableList<Concert> concerts = FXCollections.observableArrayList();
 
     public static void showMainMenu(Stage primaryStage) {
+        // Remove past concerts since they are no longer bookable
+        removePastConcerts();
+
         TabPane tabPane = new TabPane();
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
         // Customer tab
@@ -84,19 +88,22 @@ public class MainMenuScreen {
         Tab adminTab = new Tab("Admin");
         VBox adminVbox = new VBox(10);
         adminVbox.setPadding(new Insets(10));
+        adminVbox.setStyle("-fx-alignment: center;");
         Button manageCustomersButton = new Button("Hantera kunder");
         Button manageAddressesButton = new Button("Hantera adresser");
         Button manageConcertsButton = new Button("Hantera konserter");
         Button manageArenasButton = new Button("Hantera arenor");
         Button manageWCButton = new Button("Hantera WC");
+        Button viewBookingsButton = new Button("Se bokningar");
 
         manageCustomersButton.setOnAction(e -> ManagementScreen.showManagementScreen("Hantera kunder", Customer.class));
         manageAddressesButton.setOnAction(e -> ManagementScreen.showManagementScreen("Hantera adresser", Address.class));
         manageConcertsButton.setOnAction(e -> ManagementScreen.showManagementScreen("Hantera konserter", Concert.class));
         manageArenasButton.setOnAction(e -> ManagementScreen.showManagementScreen("Hantera arenor", Arena.class));
         manageWCButton.setOnAction(e -> ManagementScreen.showManagementScreen("Hantera WC", WC.class));
+        viewBookingsButton.setOnAction(e -> showBookingsScreen());
 
-        adminVbox.getChildren().addAll(manageCustomersButton, manageAddressesButton, manageConcertsButton, manageArenasButton, manageWCButton);
+        adminVbox.getChildren().addAll(manageCustomersButton, manageAddressesButton, manageConcertsButton, manageArenasButton, manageWCButton, viewBookingsButton);
         adminTab.setContent(adminVbox);
 
         tabPane.getTabs().addAll(customerTab, adminTab);
@@ -278,5 +285,43 @@ public class MainMenuScreen {
         updateBookedConcerts(bookedConcertsList);
         bookedConcertsList.setVisible(true);
         bookedConcertsLabel.setVisible(true);
+    }
+
+    private static void showBookingsScreen() {
+        Stage stage = new Stage();
+        VBox vbox = new VBox(10);
+        vbox.setPadding(new Insets(10));
+
+        Label selectConcertLabel = new Label("Välj konsert:");
+        ComboBox<Concert> concertComboBox = new ComboBox<>(FXCollections.observableArrayList(concertDAO.getAllConcerts()));
+        ListView<Customer> customerListView = new ListView<>();
+        customerListView.setPlaceholder(new Label("Inga bokningar"));
+
+        concertComboBox.setOnAction(e -> {
+            Concert selectedConcert = concertComboBox.getValue();
+            if (selectedConcert != null) {
+                WcOperations wcOperations = new WcOperations();
+                List<Customer> bookedCustomers = wcOperations.getCustomerByConcert(selectedConcert);
+                customerListView.setItems(FXCollections.observableArrayList(bookedCustomers));
+            }
+        });
+
+        vbox.getChildren().addAll(selectConcertLabel, concertComboBox, customerListView);
+        Scene scene = new Scene(vbox, 400, 400);
+        stage.setScene(scene);
+        stage.setTitle("Bokningar");
+        stage.show();
+    }
+
+    public static void removePastConcerts() {
+        List<Concert> allConcerts = concertDAO.getAllConcerts();
+        LocalDate today = LocalDate.now();
+
+        for (Concert concert : allConcerts) {
+            if (concert.getDate().isBefore(today)) {
+                concertDAO.deleteConcert(concert.getConcert_id());
+                System.out.println("Raderade gammal konsert: " + concert.getArtist() + " den " + concert.getDate());
+            }
+        }
     }
 }
