@@ -20,7 +20,7 @@ public class Concert {
 
     private int age_limit;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "arena_id")
     private Arena arena;
 

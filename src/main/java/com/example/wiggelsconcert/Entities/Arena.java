@@ -13,7 +13,7 @@ public class Arena {
     private String name;
     private String type;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "address_id")
     private Address address;
 
