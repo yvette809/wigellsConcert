@@ -40,8 +40,6 @@ public class ManagementScreen {
         // Disable these since it will only lead to issues down the line
         if (title.equals("Hantera adresser")) {
             deleteButton.setDisable(true);
-        } else if (title.equals("Hantera WC")) {
-            addButton.setDisable(true);
         }
 
         addButton.setOnAction(e -> showEntityForm(entityClass, null, observableList));
@@ -83,7 +81,6 @@ public class ManagementScreen {
         vbox.getChildren().add(formFields);
 
         Button saveButton = new Button("Spara");
-        saveButton.setDisable(entityClass == WC.class); // Disable save button in WC since we don't want to add or update them manually
         saveButton.setOnAction(e -> {
             try {
                 for (Object input : fieldInputs.values()) {
@@ -228,7 +225,61 @@ public class ManagementScreen {
                 }
 
                 fieldInputs.put(field.getName(), arenaComboBox);
-                vbox.getChildren().addAll(fieldLabel, searchField, arenaComboBox);
+                vbox.getChildren().addAll(fieldLabel, arenaComboBox, searchField);
+            } else if (field.getType() == Customer.class) {
+                ObservableList<Customer> customers = FXCollections.observableArrayList(customerDAO.getAllCustomers());
+                ComboBox<Customer> customerComboBox = new ComboBox<>(customers);
+                customerComboBox.setPrefWidth(300);
+
+                TextField searchField = new TextField();
+                searchField.setPromptText("Sök kund...");
+                searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+                    List<Customer> filteredList = customers.stream()
+                            .filter(c -> c.toString().toLowerCase().contains(newValue.toLowerCase()))
+                            .collect(Collectors.toList());
+                    customerComboBox.setItems(FXCollections.observableArrayList(filteredList));
+                });
+
+                if (entity != null) {
+                    try {
+                        Customer currentCustomer = (Customer) field.get(entity);
+                        if (currentCustomer != null) {
+                            customerComboBox.setValue(currentCustomer);
+                        }
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                fieldInputs.put(field.getName(), customerComboBox);
+                vbox.getChildren().addAll(fieldLabel, customerComboBox, searchField);
+            } else if (field.getType() == Concert.class) {
+                ObservableList<Concert> concerts = FXCollections.observableArrayList(concertDAO.getAllConcerts());
+                ComboBox<Concert> concertComboBox = new ComboBox<>(concerts);
+                concertComboBox.setPrefWidth(300);
+
+                TextField searchField = new TextField();
+                searchField.setPromptText("Sök konsert...");
+                searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+                    List<Concert> filteredList = concerts.stream()
+                            .filter(c -> c.getArtist().toLowerCase().contains(newValue.toLowerCase()))
+                            .collect(Collectors.toList());
+                    concertComboBox.setItems(FXCollections.observableArrayList(filteredList));
+                });
+
+                if (entity != null) {
+                    try {
+                        Concert currentConcert = (Concert) field.get(entity);
+                        if (currentConcert != null) {
+                            concertComboBox.setValue(currentConcert);
+                        }
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                fieldInputs.put(field.getName(), concertComboBox);
+                vbox.getChildren().addAll(fieldLabel, concertComboBox, searchField);
             } else {
                 TextField textField = new TextField();
                 if (entity != null) {
@@ -238,7 +289,6 @@ public class ManagementScreen {
                         e.printStackTrace();
                     }
                 }
-                textField.setDisable(entityClass == WC.class); // Disable textfields in WC to stop manual manipulation of bookings
                 fieldInputs.put(field.getName(), textField);
                 vbox.getChildren().addAll(fieldLabel, textField);
             }
