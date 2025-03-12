@@ -37,11 +37,6 @@ public class ManagementScreen {
         Button updateButton = new Button("Uppdatera/Se info");
         Button deleteButton = new Button("Ta bort");
 
-        // Disable these since it will only lead to issues down the line
-        if (title.equals("Hantera adresser")) {
-            deleteButton.setDisable(true);
-        }
-
         addButton.setOnAction(e -> showEntityForm(entityClass, null, observableList));
         updateButton.setOnAction(e -> {
             T selectedEntity = listView.getSelectionModel().getSelectedItem();
@@ -321,10 +316,41 @@ public class ManagementScreen {
 
     private static <T> void deleteEntity(T entity, Class<T> entityClass) {
         if (entity == null) return;
-        if (entityClass == Customer.class) customerDAO.deleteCustomer(((Customer) entity).getCustomer_id());
-        else if (entityClass == Concert.class) concertDAO.deleteConcert(((Concert) entity).getConcert_id());
-        else if (entityClass == Arena.class) arenaDAO.deleteArena(((Arena) entity).getArena_id());
-        else if (entityClass == WC.class) wcDAO.deleteWc(((WC) entity).getWc_id());
+
+        if (entityClass == Address.class) {
+            Address address = (Address) entity;
+            List<Customer> customersUsingAddress = customerDAO.getAllCustomers().stream()
+                    .filter(c -> c.getAddress() != null && c.getAddress().getAddress_id() == address.getAddress_id())
+                    .collect(Collectors.toList());
+
+            List<Arena> arenasUsingAddress = arenaDAO.getAllArenas().stream()
+                    .filter(a -> a.getAddress() != null && a.getAddress().getAddress_id() == address.getAddress_id())
+                    .collect(Collectors.toList());
+
+            if (!customersUsingAddress.isEmpty() || !arenasUsingAddress.isEmpty()) {
+                StringBuilder warningMessage = new StringBuilder("Adressen används av:\n");
+
+                customersUsingAddress.forEach(c -> warningMessage.append(" - Kund: ").append(c.getFirst_name()).append(" ").append(c.getLast_name()).append("\n"));
+                arenasUsingAddress.forEach(a -> warningMessage.append(" - Arena: ").append(a.getName()).append("\n"));
+
+                warningMessage.append("och kan därför inte tas bort!");
+
+                Alert alert = new Alert(Alert.AlertType.WARNING, warningMessage.toString());
+                alert.show();
+                return;
+            }
+
+            addressDAO.deleteAddress(address.getAddress_id());
+        } else if (entityClass == Customer.class) {
+            customerDAO.deleteCustomer(((Customer) entity).getCustomer_id());
+        } else if (entityClass == Concert.class) {
+            concertDAO.deleteConcert(((Concert) entity).getConcert_id());
+        } else if (entityClass == Arena.class) {
+            arenaDAO.deleteArena(((Arena) entity).getArena_id());
+        } else if (entityClass == WC.class) {
+            wcDAO.deleteWc(((WC) entity).getWc_id());
+        }
+
         Alert alert = new Alert(Alert.AlertType.INFORMATION, "Borttaget: " + entity.toString());
         alert.show();
     }
