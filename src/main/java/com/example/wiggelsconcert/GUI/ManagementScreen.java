@@ -353,6 +353,7 @@ public class ManagementScreen {
                     .collect(Collectors.toList());
             customerBookings.forEach(wc -> wcDAO.deleteWc(wc.getWc_id()));
             customerDAO.deleteCustomer(customer.getCustomer_id());
+            MainMenuScreen.logoutIfCustomerDeleted(customer.getCustomer_id());
 
         } else if (entityClass == Concert.class) {
             Concert concert = (Concert) entity;
