@@ -5,7 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="da6eeb10-8cbf-4d71-bdfe-1669fb6230d9" name="Changes" comment="logiken för att ta fram alla kunder som köpt biljett till specifik konsert">
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/wiggelsconcert/utils/WcOperations.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/wiggelsconcert/utils/WcOperations.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/db/mock_data.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/wiggelsconcert/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/wiggelsconcert/Main.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -26,7 +30,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="Jonte" />
+        <entry key="$PROJECT_DIR$" value="main" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -43,6 +47,9 @@
     &quot;accountId&quot;: &quot;92c73fd1-5337-435d-b920-5e40239738f3&quot;
   }
 }</component>
+  <component name="KubernetesApiProvider"><![CDATA[{
+  "isMigrated": true
+}]]></component>
   <component name="MavenImportPreferences">
     <option name="generalSettings">
       <MavenGeneralSettings>
@@ -70,7 +77,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "mockdata",
     "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/HP 1030 G2 Touch/Documents/wigellsConcert",
@@ -209,5 +216,16 @@
     <MESSAGE value="doas creation completed" />
     <MESSAGE value="logiken för att ta fram alla kunder som köpt biljett till specifik konsert" />
     <option name="LAST_COMMIT_MESSAGE" value="logiken för att ta fram alla kunder som köpt biljett till specifik konsert" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/com/example/wiggelsconcert/Main.java</url>
+          <line>16</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
