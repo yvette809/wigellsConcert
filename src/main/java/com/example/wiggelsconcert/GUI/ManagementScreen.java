@@ -45,13 +45,17 @@ public class ManagementScreen {
                 showEntityForm(entityClass, selectedEntity, observableList);
             }
         });
-        deleteButton.setOnAction(e -> deleteEntity(listView.getSelectionModel().getSelectedItem(), entityClass));
+        deleteButton.setOnAction(e -> deleteEntity(listView.getSelectionModel().getSelectedItem(), entityClass, observableList));
 
         vbox.getChildren().addAll(label, listView, addButton, updateButton, deleteButton);
         Scene scene = new Scene(vbox, 400, 400);
         stage.setScene(scene);
         stage.setTitle(title);
         stage.show();
+    }
+
+    private static <T> void updateListView(ObservableList<T> observableList, Class<T> entityClass) {
+        observableList.setAll(fetchEntities(entityClass));
     }
 
     private static <T> List<T> fetchEntities(Class<T> entityClass) {
@@ -110,7 +114,7 @@ public class ManagementScreen {
                     }
                 }
                 saveOrUpdateEntity(newInstance, entityClass);
-                observableList.setAll(fetchEntities(entityClass));
+                updateListView(observableList, entityClass);
                 stage.close();
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -315,7 +319,7 @@ public class ManagementScreen {
         alert.show();
     }
 
-    private static <T> void deleteEntity(T entity, Class<T> entityClass) {
+    private static <T> void deleteEntity(T entity, Class<T> entityClass, ObservableList<T> observableList) {
         if (entity == null) return;
         WcOperations wcOperations = new WcOperations();
 
@@ -380,6 +384,7 @@ public class ManagementScreen {
         } else if (entityClass == WC.class) {
             wcDAO.deleteWc(((WC) entity).getWc_id());
         }
+        updateListView(observableList, entityClass);
         Alert alert = new Alert(Alert.AlertType.INFORMATION, "Borttaget: " + entity.toString());
         alert.show();
     }
