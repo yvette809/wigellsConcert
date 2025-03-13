@@ -85,6 +85,15 @@ public class MainMenuScreen {
         customerVbox.getChildren().addAll(label, concertTable, searchField, buyTicketButton, loginSection, bookedConcertsLabel, bookedConcertsList);
         customerTab.setContent(customerVbox);
 
+        // Update this tab every time we switch to it
+        tabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldTab, newTab) -> {
+            if (newTab == customerTab) {
+                updateCustomerTab(loggedInLabel, (Button) loginSection.getChildren().get(1),
+                        (Button) loginSection.getChildren().get(2), (Button) loginSection.getChildren().get(3),
+                        buyTicketButton, bookedConcertsList, bookedConcertsLabel);
+            }
+        });
+
         // Admin tab
         Tab adminTab = new Tab("Admin");
         VBox adminVbox = new VBox(10);
@@ -113,6 +122,15 @@ public class MainMenuScreen {
         primaryStage.show();
     }
 
+    // Let's just update everything just to make sure
+    private static void updateCustomerTab(Label loggedInLabel, Button existingCustomerButton, Button newCustomerButton,
+                                          Button logoutButton, Button buyTicketButton, ListView<Concert> bookedConcertsList,
+                                          Label bookedConcertsLabel) {
+        updateConcertTable();
+        updateBookedConcerts(bookedConcertsList);
+        updateLoginSection(loggedInLabel, existingCustomerButton, newCustomerButton, logoutButton, buyTicketButton, bookedConcertsList, bookedConcertsLabel);
+    }
+
     public static void updateConcertTable() {
         concerts.setAll(concertDAO.getAllConcerts());
     }
@@ -122,6 +140,9 @@ public class MainMenuScreen {
             List<Concert> bookedConcerts = wcOperations.getConcertByCustomer(loggedInCustomer);
             bookedConcertsList.setItems(FXCollections.observableArrayList(bookedConcerts));
             bookedConcertsList.setVisible(true);
+        } else {
+            bookedConcertsList.getItems().clear();
+            bookedConcertsList.setVisible(false);
         }
     }
 
@@ -135,6 +156,15 @@ public class MainMenuScreen {
             updateBookedConcerts(bookedConcertsList);
             bookedConcertsList.setVisible(true);
             bookedConcertsLabel.setVisible(true);
+        } else {
+            loggedInLabel.setText("Inte inloggad");
+            buyTicketButton.setVisible(false);
+            existingCustomerButton.setVisible(true);
+            newCustomerButton.setVisible(true);
+            logoutButton.setVisible(false);
+            bookedConcertsList.setVisible(false);
+            bookedConcertsList.getItems().clear();
+            bookedConcertsLabel.setVisible(false);
         }
     }
 
@@ -159,14 +189,7 @@ public class MainMenuScreen {
 
         logoutButton.setOnAction(e -> {
             loggedInCustomer = null;
-            loggedInLabel.setText("Inte inloggad");
-            buyTicketButton.setVisible(false);
-            existingCustomerButton.setVisible(true);
-            newCustomerButton.setVisible(true);
-            logoutButton.setVisible(false);
-            bookedConcertsList.setVisible(false);
-            bookedConcertsList.getItems().clear();
-            bookedConcertsLabel.setVisible(false);
+            updateLoginSection(loggedInLabel, existingCustomerButton, newCustomerButton, logoutButton, buyTicketButton, bookedConcertsList, bookedConcertsLabel);
         });
 
         loginSection.getChildren().addAll(loggedInLabel, existingCustomerButton, newCustomerButton, logoutButton);
@@ -333,6 +356,12 @@ public class MainMenuScreen {
                 concertDAO.deleteConcert(concert.getConcert_id());
                 System.out.println("Raderade gammal konsert: " + concert.getArtist() + " den " + concert.getDate());
             }
+        }
+    }
+
+    public static void logoutIfCustomerDeleted(int deletedCustomerId) {
+        if (loggedInCustomer != null && loggedInCustomer.getCustomer_id() == deletedCustomerId) {
+            loggedInCustomer = null;
         }
     }
 }
