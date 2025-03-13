@@ -365,6 +365,7 @@ public class ManagementScreen {
                 return;
             }
             concertDAO.deleteConcert(concert.getConcert_id());
+            MainMenuScreen.updateConcertTable();
 
         } else if (entityClass == Arena.class) {
             Arena arena = (Arena) entity;
