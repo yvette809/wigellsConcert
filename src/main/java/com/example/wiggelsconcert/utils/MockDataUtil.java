@@ -1,5 +1,9 @@
 package com.example.wiggelsconcert.utils;
 
+import com.example.wiggelsconcert.DAO.AddressDAO;
+import com.example.wiggelsconcert.DAO.ArenaDAO;
+import com.example.wiggelsconcert.DAO.ConcertDAO;
+import com.example.wiggelsconcert.DAO.CustomerDAO;
 import com.example.wiggelsconcert.Entities.*;
 import org.hibernate.Session;
 import java.time.LocalDate;
@@ -8,7 +12,7 @@ import java.util.List;
 public class MockDataUtil {
 
     public static void insertMockData(Session session) {
-
+        
         // 📌 Create 5 addresses
         Address address1 = new Address("Storgatan", "12A", "12345", "Stockholm");
         Address address2 = new Address("Drottninggatan", "5B", "98765", "Gothenburg");
@@ -58,7 +62,7 @@ public class MockDataUtil {
         concert4.setArena(arena4);
         concert5.setArena(arena5);
 
-        // 📌 Persist all entities
+        //  Persist all entities
         List.of(address1, address2, address3, address4, address5).forEach(session::save);
         List.of(customer1, customer2, customer3, customer4, customer5).forEach(session::save);
         List.of(arena1, arena2, arena3, arena4, arena5).forEach(session::save);
