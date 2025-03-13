@@ -140,6 +140,9 @@ public class MainMenuScreen {
             List<Concert> bookedConcerts = wcOperations.getConcertByCustomer(loggedInCustomer);
             bookedConcertsList.setItems(FXCollections.observableArrayList(bookedConcerts));
             bookedConcertsList.setVisible(true);
+        } else {
+            bookedConcertsList.getItems().clear();
+            bookedConcertsList.setVisible(false);
         }
     }
 
@@ -153,6 +156,15 @@ public class MainMenuScreen {
             updateBookedConcerts(bookedConcertsList);
             bookedConcertsList.setVisible(true);
             bookedConcertsLabel.setVisible(true);
+        } else {
+            loggedInLabel.setText("Inte inloggad");
+            buyTicketButton.setVisible(false);
+            existingCustomerButton.setVisible(true);
+            newCustomerButton.setVisible(true);
+            logoutButton.setVisible(false);
+            bookedConcertsList.setVisible(false);
+            bookedConcertsList.getItems().clear();
+            bookedConcertsLabel.setVisible(false);
         }
     }
 
@@ -177,14 +189,7 @@ public class MainMenuScreen {
 
         logoutButton.setOnAction(e -> {
             loggedInCustomer = null;
-            loggedInLabel.setText("Inte inloggad");
-            buyTicketButton.setVisible(false);
-            existingCustomerButton.setVisible(true);
-            newCustomerButton.setVisible(true);
-            logoutButton.setVisible(false);
-            bookedConcertsList.setVisible(false);
-            bookedConcertsList.getItems().clear();
-            bookedConcertsLabel.setVisible(false);
+            updateLoginSection(loggedInLabel, existingCustomerButton, newCustomerButton, logoutButton, buyTicketButton, bookedConcertsList, bookedConcertsLabel);
         });
 
         loginSection.getChildren().addAll(loggedInLabel, existingCustomerButton, newCustomerButton, logoutButton);
