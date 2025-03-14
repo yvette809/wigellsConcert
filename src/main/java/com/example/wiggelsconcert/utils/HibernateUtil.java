@@ -1,8 +1,6 @@
 package com.example.wiggelsconcert.utils;
 
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 
 public class HibernateUtil {
@@ -27,8 +25,9 @@ public class HibernateUtil {
             configuration.setProperty("hibernate.connection.password", password);
 
             sessionFactory = configuration.buildSessionFactory();
-            insertMockData();
             sessionFactory.openSession().close();
+
+            MockDataUtil.insertMockData();
 
             return true;
         } catch (Exception e) {
@@ -46,25 +45,6 @@ public class HibernateUtil {
         if (sessionFactory != null) {
             sessionFactory.close();
             sessionFactory = null;
-        }
-    }
-
-    private static void insertMockData() {
-        SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
-        Session session = sessionFactory.openSession();
-        Transaction transaction = session.beginTransaction();
-
-        try {
-            MockDataUtil.insertMockData(session);
-            transaction.commit();
-            System.out.println("✅ Mock data inserted successfully!");
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            System.err.println("Error inserting mock data: " + e.getMessage());
-        } finally {
-            session.close();
         }
     }
 }
