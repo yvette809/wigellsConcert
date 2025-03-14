@@ -16,7 +16,11 @@ public class MockDataUtil {
     private static final ConcertDAO concertDAO = new ConcertDAO();
 
     public static void insertMockData() {
-        
+        // Don't add mock data is there already is data in the database
+        if(!addressDAO.getAllAddresses().isEmpty()) {
+            return;
+        }
+
         // 📌 Create 5 addresses
         addressDAO.saveAddress(new Address("Storgatan", "12A", "12345", "Stockholm"));
         addressDAO.saveAddress(new Address("Drottninggatan", "5B", "98765", "Gothenburg"));
@@ -42,10 +46,10 @@ public class MockDataUtil {
         // 📌 Create 5 concerts (updated to match the new constructor)
         List<Arena> arenas = arenaDAO.getAllArenas();
         concertDAO.saveConcert(new Concert("ABBA Reunion", LocalDate.of(2025, 6, 15), 950.00, 18, arenas.get(0)));
-        concertDAO.saveConcert(new Concert("Metallica Live", LocalDate.of(2025, 7, 10), 1200.00, 15, arenas.get(0)));
-        concertDAO.saveConcert(new Concert("Ed Sheeran Tour", LocalDate.of(2025, 8, 5), 850.00, 12, arenas.get(0)));
-        concertDAO.saveConcert(new Concert("Håkan Hellström", LocalDate.of(2025, 9, 20), 750.00, 18, arenas.get(0)));
-        concertDAO.saveConcert(new Concert("Beyoncé Live", LocalDate.of(2025, 10, 25), 1400.00, 12, arenas.get(0)));
+        concertDAO.saveConcert(new Concert("Metallica Live", LocalDate.of(2025, 7, 10), 1200.00, 15, arenas.get(1)));
+        concertDAO.saveConcert(new Concert("Ed Sheeran Tour", LocalDate.of(2025, 8, 5), 850.00, 12, arenas.get(2)));
+        concertDAO.saveConcert(new Concert("Håkan Hellström", LocalDate.of(2025, 9, 20), 750.00, 18, arenas.get(3)));
+        concertDAO.saveConcert(new Concert("Beyoncé Live", LocalDate.of(2025, 10, 25), 1400.00, 12, arenas.get(4)));
 
         System.out.println("✅ Mock data successfully inserted!");
     }
