@@ -28,11 +28,12 @@ public class Concert {
 
     }
 
-    public Concert(String artist, LocalDate date, double ticket_price, int age_limit) {
+    public Concert(String artist, LocalDate date, double ticket_price, int age_limit, Arena arena) {
         this.artist = artist;
         this.date = date;
         this.ticket_price = ticket_price;
         this.age_limit = age_limit;
+        this.arena = arena;
     }
 
     public int getConcert_id() {

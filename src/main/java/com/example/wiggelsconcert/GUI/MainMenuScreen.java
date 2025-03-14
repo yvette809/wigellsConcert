@@ -267,8 +267,7 @@ public class MainMenuScreen {
                 addressDAO.saveAddress(existingAddress);
             }
 
-            Customer newCustomer = new Customer(firstNameField.getText(), lastNameField.getText(), birthDatePicker.getValue(), phoneNumberField.getText());
-            newCustomer.setAddress(existingAddress);
+            Customer newCustomer = new Customer(firstNameField.getText(), lastNameField.getText(), birthDatePicker.getValue(), phoneNumberField.getText(), existingAddress);
             customerDAO.saveCustomer(newCustomer);
             loggedInCustomer = newCustomer;
             updateLoginSection(loggedInLabel, (Button) ((VBox) loggedInLabel.getParent()).getChildren().get(1),

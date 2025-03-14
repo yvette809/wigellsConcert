@@ -22,11 +22,12 @@ public class Customer {
 
     }
 
-    public Customer(String first_name, String last_name, LocalDate birth_day, String phone_number) {
+    public Customer(String first_name, String last_name, LocalDate birth_day, String phone_number, Address address) {
         this.first_name = first_name;
         this.last_name = last_name;
         this.birth_day = birth_day;
         this.phone_number = phone_number;
+        this.address = address;
     }
 
     public int getCustomer_id() {
