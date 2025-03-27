@@ -20,13 +20,19 @@ import java.util.stream.Collectors;
 
 public class ManagementScreen {
 
-    private static final CustomerDAO customerDAO = new CustomerDAO();
-    private static final ConcertDAO concertDAO = new ConcertDAO();
-    private static final ArenaDAO arenaDAO = new ArenaDAO();
-    private static final AddressDAO addressDAO = new AddressDAO();
-    private static final WcDAO wcDAO = new WcDAO();
+    private final MainMenuScreen mainMenuScreen;
 
-    public static <T> void showManagementScreen(String title, Class<T> entityClass) {
+    public ManagementScreen(MainMenuScreen mainMenuScreen) {
+        this.mainMenuScreen = mainMenuScreen;
+    }
+
+    private final CustomerDAO customerDAO = new CustomerDAO();
+    private final ConcertDAO concertDAO = new ConcertDAO();
+    private final ArenaDAO arenaDAO = new ArenaDAO();
+    private final AddressDAO addressDAO = new AddressDAO();
+    private final WcDAO wcDAO = new WcDAO();
+
+    public <T> void showManagementScreen(String title, Class<T> entityClass) {
         Stage stage = new Stage();
         VBox vbox = new VBox(10);
         vbox.setPadding(new Insets(10));
@@ -54,11 +60,11 @@ public class ManagementScreen {
         stage.show();
     }
 
-    private static <T> void updateListView(ObservableList<T> observableList, Class<T> entityClass) {
+    private <T> void updateListView(ObservableList<T> observableList, Class<T> entityClass) {
         observableList.setAll(fetchEntities(entityClass));
     }
 
-    private static <T> List<T> fetchEntities(Class<T> entityClass) {
+    private <T> List<T> fetchEntities(Class<T> entityClass) {
         if (entityClass == Customer.class) return (List<T>) customerDAO.getAllCustomers();
         if (entityClass == Concert.class) return (List<T>) concertDAO.getAllConcerts();
         if (entityClass == Arena.class) return (List<T>) arenaDAO.getAllArenas();
@@ -67,7 +73,7 @@ public class ManagementScreen {
         return List.of();
     }
 
-    private static <T> void showEntityForm(Class<T> entityClass, T entity, ObservableList<T> observableList) {
+    private <T> void showEntityForm(Class<T> entityClass, T entity, ObservableList<T> observableList) {
         Stage stage = new Stage();
         VBox vbox = new VBox(10);
         vbox.setPadding(new Insets(10));
@@ -128,7 +134,7 @@ public class ManagementScreen {
         stage.show();
     }
 
-    private static <T> VBox generateFormFields(Class<T> entityClass, T entity, Map<String, Object> fieldInputs) {
+    private <T> VBox generateFormFields(Class<T> entityClass, T entity, Map<String, Object> fieldInputs) {
         VBox vbox = new VBox(10);
         Field[] entityFields = entityClass.getDeclaredFields();
 
@@ -297,14 +303,14 @@ public class ManagementScreen {
     }
 
     // We use the fact that new entities don't yet have an id to tell new and old entries apart
-    private static <T> void saveOrUpdateEntity(T entity, Class<T> entityClass) {
+    private <T> void saveOrUpdateEntity(T entity, Class<T> entityClass) {
         if (entityClass == Customer.class) {
             if (((Customer) entity).getCustomer_id() == 0) customerDAO.saveCustomer((Customer) entity);
             else customerDAO.updateCustomer((Customer) entity);
         } else if (entityClass == Concert.class) {
             if (((Concert) entity).getConcert_id() == 0) concertDAO.saveConcert((Concert) entity);
             else concertDAO.updateConcert((Concert) entity);
-            MainMenuScreen.updateConcertTable();
+            mainMenuScreen.updateConcertTable();
         } else if (entityClass == Arena.class) {
             if (((Arena) entity).getArena_id() == 0) arenaDAO.saveArena((Arena) entity);
             else arenaDAO.updateArena((Arena) entity);
@@ -319,7 +325,7 @@ public class ManagementScreen {
         alert.show();
     }
 
-    private static <T> void deleteEntity(T entity, Class<T> entityClass, ObservableList<T> observableList) {
+    private <T> void deleteEntity(T entity, Class<T> entityClass, ObservableList<T> observableList) {
         if (entity == null) return;
         WcOperations wcOperations = new WcOperations();
 
@@ -328,10 +334,10 @@ public class ManagementScreen {
             // Prevent deletion of addresses connected to customers and arenas
             List<Customer> customersUsingAddress = customerDAO.getAllCustomers().stream()
                     .filter(c -> c.getAddress() != null && c.getAddress().getAddress_id() == address.getAddress_id())
-                    .collect(Collectors.toList());
+                    .toList();
             List<Arena> arenasUsingAddress = arenaDAO.getAllArenas().stream()
                     .filter(a -> a.getAddress() != null && a.getAddress().getAddress_id() == address.getAddress_id())
-                    .collect(Collectors.toList());
+                    .toList();
 
             if (!customersUsingAddress.isEmpty() || !arenasUsingAddress.isEmpty()) {
                 StringBuilder warningMessage = new StringBuilder("Adressen används av:\n");
@@ -350,10 +356,10 @@ public class ManagementScreen {
             // Delete all booking connected to the customer we delete
             List<WC> customerBookings = wcDAO.getAllWcRegistrations().stream()
                     .filter(wc -> wc.getCustomer().getCustomer_id() == customer.getCustomer_id())
-                    .collect(Collectors.toList());
+                    .toList();
             customerBookings.forEach(wc -> wcDAO.deleteWc(wc.getWc_id()));
             customerDAO.deleteCustomer(customer.getCustomer_id());
-            MainMenuScreen.logoutIfCustomerDeleted(customer.getCustomer_id());
+            mainMenuScreen.logoutIfCustomerDeleted(customer.getCustomer_id());
 
         } else if (entityClass == Concert.class) {
             Concert concert = (Concert) entity;
@@ -366,14 +372,14 @@ public class ManagementScreen {
                 return;
             }
             concertDAO.deleteConcert(concert.getConcert_id());
-            MainMenuScreen.updateConcertTable();
+            mainMenuScreen.updateConcertTable();
 
         } else if (entityClass == Arena.class) {
             Arena arena = (Arena) entity;
             // We prevent deletion of arenas with planned concerts
             List<Concert> concertsAtArena = concertDAO.getAllConcerts().stream()
                     .filter(c -> c.getArena() != null && c.getArena().getArena_id() == arena.getArena_id())
-                    .collect(Collectors.toList());
+                    .toList();
             if (!concertsAtArena.isEmpty()) {
                 StringBuilder warningMessage = new StringBuilder("Arenan har planerade konserter och kan därför inte tas bort:\n");
                 concertsAtArena.forEach(c -> warningMessage.append(" - Konsert: ").append(c.getArtist()).append(", ").append(c.getDate()).append("\n"));

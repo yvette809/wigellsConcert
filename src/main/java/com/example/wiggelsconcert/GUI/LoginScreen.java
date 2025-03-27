@@ -9,7 +9,13 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class LoginScreen {
-    public static void showLoginScreen(Stage primaryStage) {
+
+    private final MainMenuScreen mainMenuScreen;
+
+    public LoginScreen(MainMenuScreen mainMenuScreen) {
+        this.mainMenuScreen = mainMenuScreen;
+    }
+    public void showLoginScreen(Stage primaryStage) {
         Stage loginStage = new Stage();
         VBox vbox = new VBox(10);
         vbox.setPadding(new Insets(20));
@@ -34,7 +40,7 @@ public class LoginScreen {
             String port = portField.getText();
             if (HibernateUtil.initializeDatabase(username, password, ip, port)) {
                 loginStage.close();
-                MainMenuScreen.showMainMenu(primaryStage);
+                mainMenuScreen.showMainMenu(primaryStage);
             } else {
                 Alert alert = new Alert(Alert.AlertType.ERROR, "Felaktiga inloggningsuppgifter!");
                 alert.show();
