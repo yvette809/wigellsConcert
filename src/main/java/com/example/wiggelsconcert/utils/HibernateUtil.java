@@ -27,7 +27,8 @@ public class HibernateUtil {
             sessionFactory = configuration.buildSessionFactory();
             sessionFactory.openSession().close();
 
-            MockDataUtil.insertMockData();
+            MockDataUtil mockdataUtil = new MockDataUtil();
+            mockdataUtil.insertMockData();
 
             return true;
         } catch (Exception e) {

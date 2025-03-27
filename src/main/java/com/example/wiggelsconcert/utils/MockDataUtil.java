@@ -10,12 +10,12 @@ import java.util.List;
 
 public class MockDataUtil {
 
-    private static final AddressDAO addressDAO = new AddressDAO();
-    private static final ArenaDAO arenaDAO = new ArenaDAO();
-    private static final CustomerDAO customerDAO = new CustomerDAO();
-    private static final ConcertDAO concertDAO = new ConcertDAO();
+    private final AddressDAO addressDAO = new AddressDAO();
+    private final ArenaDAO arenaDAO = new ArenaDAO();
+    private final CustomerDAO customerDAO = new CustomerDAO();
+    private final ConcertDAO concertDAO = new ConcertDAO();
 
-    public static void insertMockData() {
+    public void insertMockData() {
         // Don't add mock data is there already is data in the database
         if(!addressDAO.getAllAddresses().isEmpty()) {
             return;
