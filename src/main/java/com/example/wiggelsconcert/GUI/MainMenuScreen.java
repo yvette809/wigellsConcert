@@ -18,17 +18,16 @@ import javafx.stage.Stage;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class MainMenuScreen {
-    private static final ConcertDAO concertDAO = new ConcertDAO();
-    private static final AddressDAO addressDAO = new AddressDAO();
-    private static final CustomerDAO customerDAO = new CustomerDAO();
-    private static final WcDAO wcDAO = new WcDAO();
-    private static Customer loggedInCustomer = null;
-    private static ObservableList<Concert> concerts = FXCollections.observableArrayList();
+    private final ConcertDAO concertDAO = new ConcertDAO();
+    private final AddressDAO addressDAO = new AddressDAO();
+    private final CustomerDAO customerDAO = new CustomerDAO();
+    private final WcDAO wcDAO = new WcDAO();
+    private Customer loggedInCustomer = null;
+    private final ObservableList<Concert> concerts = FXCollections.observableArrayList();
 
-    public static void showMainMenu(Stage primaryStage) {
+    public void showMainMenu(Stage primaryStage) {
         // Remove past concerts since they are no longer bookable
         removePastConcerts();
 
@@ -106,11 +105,13 @@ public class MainMenuScreen {
         Button manageWCButton = new Button("Hantera WC");
         Button viewBookingsButton = new Button("Se bokningar");
 
-        manageCustomersButton.setOnAction(e -> ManagementScreen.showManagementScreen("Hantera kunder", Customer.class));
-        manageAddressesButton.setOnAction(e -> ManagementScreen.showManagementScreen("Hantera adresser", Address.class));
-        manageConcertsButton.setOnAction(e -> ManagementScreen.showManagementScreen("Hantera konserter", Concert.class));
-        manageArenasButton.setOnAction(e -> ManagementScreen.showManagementScreen("Hantera arenor", Arena.class));
-        manageWCButton.setOnAction(e -> ManagementScreen.showManagementScreen("Hantera WC", WC.class));
+        ManagementScreen managementScreen = new ManagementScreen(this);
+
+        manageCustomersButton.setOnAction(e -> managementScreen.showManagementScreen("Hantera kunder", Customer.class));
+        manageAddressesButton.setOnAction(e -> managementScreen.showManagementScreen("Hantera adresser", Address.class));
+        manageConcertsButton.setOnAction(e -> managementScreen.showManagementScreen("Hantera konserter", Concert.class));
+        manageArenasButton.setOnAction(e -> managementScreen.showManagementScreen("Hantera arenor", Arena.class));
+        manageWCButton.setOnAction(e -> managementScreen.showManagementScreen("Hantera WC", WC.class));
         viewBookingsButton.setOnAction(e -> showBookingsScreen());
 
         adminVbox.getChildren().addAll(manageCustomersButton, manageAddressesButton, manageConcertsButton, manageArenasButton, manageWCButton, viewBookingsButton);
@@ -123,7 +124,7 @@ public class MainMenuScreen {
     }
 
     // Let's just update everything just to make sure
-    private static void updateCustomerTab(Label loggedInLabel, Button existingCustomerButton, Button newCustomerButton,
+    private void updateCustomerTab(Label loggedInLabel, Button existingCustomerButton, Button newCustomerButton,
                                           Button logoutButton, Button buyTicketButton, ListView<Concert> bookedConcertsList,
                                           Label bookedConcertsLabel) {
         updateConcertTable();
@@ -131,10 +132,10 @@ public class MainMenuScreen {
         updateLoginSection(loggedInLabel, existingCustomerButton, newCustomerButton, logoutButton, buyTicketButton, bookedConcertsList, bookedConcertsLabel);
     }
 
-    public static void updateConcertTable() {
+    public void updateConcertTable() {
         concerts.setAll(concertDAO.getAllConcerts());
     }
-    private static void updateBookedConcerts(ListView<Concert> bookedConcertsList) {
+    private void updateBookedConcerts(ListView<Concert> bookedConcertsList) {
         if (loggedInCustomer != null) {
             WcOperations wcOperations = new WcOperations();
             List<Concert> bookedConcerts = wcOperations.getConcertByCustomer(loggedInCustomer);
@@ -146,7 +147,7 @@ public class MainMenuScreen {
         }
     }
 
-    private static void updateLoginSection(Label loggedInLabel, Button existingCustomerButton, Button newCustomerButton, Button logoutButton, Button buyTicketButton, ListView<Concert> bookedConcertsList, Label bookedConcertsLabel) {
+    private void updateLoginSection(Label loggedInLabel, Button existingCustomerButton, Button newCustomerButton, Button logoutButton, Button buyTicketButton, ListView<Concert> bookedConcertsList, Label bookedConcertsLabel) {
         if (loggedInCustomer != null) {
             loggedInLabel.setText("Inloggad som: " + loggedInCustomer.getFirst_name() + " " + loggedInCustomer.getLast_name());
             existingCustomerButton.setVisible(false);
@@ -168,7 +169,7 @@ public class MainMenuScreen {
         }
     }
 
-    private static VBox createLoginSection(Button buyTicketButton, Label loggedInLabel, ListView<Concert> bookedConcertsList, Label bookedConcertsLabel) {
+    private VBox createLoginSection(Button buyTicketButton, Label loggedInLabel, ListView<Concert> bookedConcertsList, Label bookedConcertsLabel) {
         VBox loginSection = new VBox(10);
         loginSection.setPadding(new Insets(10));
 
@@ -196,7 +197,7 @@ public class MainMenuScreen {
         return loginSection;
     }
 
-    private static void showCustomerSelection(Button buyTicketButton, Label loggedInLabel, ListView<Concert> bookedConcertsList, Label bookedConcertsLabel) {
+    private void showCustomerSelection(Button buyTicketButton, Label loggedInLabel, ListView<Concert> bookedConcertsList, Label bookedConcertsLabel) {
         Stage stage = new Stage();
         VBox vbox = new VBox(10);
         vbox.setPadding(new javafx.geometry.Insets(10));
@@ -223,7 +224,7 @@ public class MainMenuScreen {
         stage.show();
     }
 
-    private static void showNewCustomerForm(Button buyTicketButton, Label loggedInLabel, ListView<Concert> bookedConcertsList, Label bookedConcertsLabel) {
+    private void showNewCustomerForm(Button buyTicketButton, Label loggedInLabel, ListView<Concert> bookedConcertsList, Label bookedConcertsLabel) {
         Stage stage = new Stage();
         VBox vbox = new VBox(10);
         vbox.setPadding(new Insets(10));
@@ -285,7 +286,7 @@ public class MainMenuScreen {
         stage.show();
     }
 
-    private static void buyTicket(Customer customer, Concert concert, ListView<Concert> bookedConcertsList, Label bookedConcertsLabel) {
+    private void buyTicket(Customer customer, Concert concert, ListView<Concert> bookedConcertsList, Label bookedConcertsLabel) {
         if (customer == null) {
             Alert alert = new Alert(Alert.AlertType.ERROR, "Du måste vara inloggad för att köpa en biljett!");
             alert.show();
@@ -310,7 +311,7 @@ public class MainMenuScreen {
         bookedConcertsLabel.setVisible(true);
     }
 
-    private static void showBookingsScreen() {
+    private void showBookingsScreen() {
         Stage stage = new Stage();
         VBox vbox = new VBox(10);
         vbox.setPadding(new Insets(10));
@@ -336,7 +337,7 @@ public class MainMenuScreen {
         stage.show();
     }
 
-    private static void removePastConcerts() {
+    private void removePastConcerts() {
         List<Concert> allConcerts = concertDAO.getAllConcerts();
         LocalDate today = LocalDate.now();
 
@@ -344,7 +345,7 @@ public class MainMenuScreen {
             if (concert.getDate().isBefore(today)) {
                 List<WC> relatedBookings = wcDAO.getAllWcRegistrations().stream()
                         .filter(wc -> wc.getConcert().getConcert_id() == concert.getConcert_id())
-                        .collect(Collectors.toList());
+                        .toList();
 
                 // Delete all related bookings
                 for (WC wc : relatedBookings) {
@@ -358,7 +359,7 @@ public class MainMenuScreen {
         }
     }
 
-    public static void logoutIfCustomerDeleted(int deletedCustomerId) {
+    public void logoutIfCustomerDeleted(int deletedCustomerId) {
         if (loggedInCustomer != null && loggedInCustomer.getCustomer_id() == deletedCustomerId) {
             loggedInCustomer = null;
         }
